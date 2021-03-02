@@ -1,0 +1,38 @@
+name: Quality Check
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv install -d
+
+      - name: Format
+        run: |
+          pipenv run format
+          pipenv run import-sort
+
+      - name: Lint
+        run: |
+          pipenv run lint
+          pipenv run mypy
+
+      - name: Test
+        run: pipenv run test
+
+      - name: Build
+        run: pipenv run build
