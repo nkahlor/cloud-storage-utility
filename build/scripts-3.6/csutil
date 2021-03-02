@@ -1,4 +1,0 @@
-#!python
-from cloud_storage_utility.csutil_cli import main
-
-main()
