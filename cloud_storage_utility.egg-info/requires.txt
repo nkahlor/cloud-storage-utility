@@ -1,0 +1,11 @@
+click
+setuptools
+wheel
+twine
+python-dotenv
+ibm-cos-sdk
+adal
+azure-mgmt-datalake-analytics
+azure-storage-file-datalake
+azure-datalake-store
+azure-identity
