@@ -22,6 +22,9 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    use_scm_version={
+        "write_to_template": '__version__ = "{version}"',
+    },
     setup_requires=["setuptools_scm"],
     install_requires=[
         "click",
