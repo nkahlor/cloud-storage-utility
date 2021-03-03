@@ -2,7 +2,7 @@
 
 [![codecov](https://codecov.io/gh/nkahlor/cloud-storage-utility/branch/main/graph/badge.svg?token=JBO83HCV0T)](https://codecov.io/gh/nkahlor/cloud-storage-utility)
 
-[![PyPI pyversions](https://img.shields.io/pypi/pyversions/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/cloud-storage-utility.svg)](https://pypi.python.org/pypi/cloud-storage-utility/)
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
