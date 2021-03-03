@@ -25,7 +25,6 @@ tqdm = "*"
 colorama = "*"
 
 [dev-packages]
-pdoc = "*"
 setuptools = "*"
 setuptools-scm = "*"
 wheel = "*"
