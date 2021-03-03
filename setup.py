@@ -14,6 +14,7 @@ setuptools.setup(
     packages=["cloud_storage_utility"],
     scripts=["scripts/csutil"],
     classifiers=[
+        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
