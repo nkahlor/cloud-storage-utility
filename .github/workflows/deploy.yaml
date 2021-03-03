@@ -10,68 +10,61 @@ on:
 jobs:
   build-n-publish:
     runs-on: ubuntu-latest
-    # strategy:
-    #   matrix:
-    #     python-version: [3.9]
+    strategy:
+      matrix:
+        python-version: [3.9]
 
     steps:
-      #   - uses: actions/checkout@v2
-      #   - name: Set up Python ${{ matrix.python-version }}
-      #     uses: actions/setup-python@v2
-      #     with:
-      #       python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
 
-      - name: Temp
-        if: "github.event.release.prerelease"
-        run: echo "Is prerelease"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          pipenv --python ${{ matrix.python-version }}
+          pipenv install --dev
 
-      - name: Temp
+      - name: Build
+        run: pipenv run build
+
+      - name: Generate Docs
+        run: pipenv run documentation
+
+      - name: Deploy Docs 🚀
         if: "!github.event.release.prerelease"
-        run: echo "Is real release"
+        uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: main # The branch the action should deploy to.
+          folder: docs # The folder the action should deploy.
 
-      # - name: Install dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install pipenv
-      #     pipenv --python ${{ matrix.python-version }}
-      #     pipenv install --dev
+      - name: Generate coverage report
+        if: "!github.event.release.prerelease"
+        run: pipenv run test-coverage
 
-      # - name: Build
-      #   run: pipenv run build
+      - name: Upload coverage to Codecov
+        if: "!github.event.release.prerelease"
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true
+          path_to_write_report: ./coverage/codecov_report.txt
+          verbose: true
 
-      # - name: Generate Docs
-      #   run: pipenv run documentation
+      # No matter the type of release, send it here to test
+      - name: Publish distribution 📦 to Test PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
 
-      # - name: Deploy Docs 🚀
-      #   if: github.ref == 'refs/heads/main'
-      #   uses: JamesIves/github-pages-deploy-action@4.0.0
-      #   with:
-      #     branch: main # The branch the action should deploy to.
-      #     folder: docs # The folder the action should deploy.
-
-      # - name: Generate coverage report
-      #   if: github.ref == 'refs/heads/main'
-      #   run: pipenv run test-coverage
-
-      # - name: Upload coverage to Codecov
-      #   if: github.ref == 'refs/heads/main'
-      #   uses: codecov/codecov-action@v1
-      #   with:
-      #     fail_ci_if_error: true
-      #     path_to_write_report: ./coverage/codecov_report.txt
-      #     verbose: true
-
-      # - name: Publish distribution 📦 to Test PyPI
-      #   if: github.ref == 'refs/heads/development'
-      #   uses: pypa/gh-action-pypi-publish@master
-      #   with:
-      #     user: __token__
-      #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-      #     repository_url: https://test.pypi.org/legacy/
-
-      # - name: Publish distribution 📦 to PyPI
-      #   if: github.ref == 'refs/heads/main'
-      #   uses: pypa/gh-action-pypi-publish@master
-      #   with:
-      #     user: __token__
-      #     password: ${{ secrets.PYPI_API_TOKEN }}
+      # Only upload it to official pypi if it's a genuine release, no pre-releases here!
+      - name: Publish distribution 📦 to PyPI
+        if: "!github.event.release.prerelease"
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
