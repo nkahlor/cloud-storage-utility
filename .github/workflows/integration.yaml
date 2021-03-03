@@ -18,6 +18,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install pipenv
           pipenv --python ${{ matrix.python-version }}
           pipenv install --dev --pre
@@ -34,8 +35,8 @@ jobs:
 
       - name: Test
         run: |
-          pipenv shell
-          tox -e py
+          pip install tox tox-gh-actions
+          tox
 
       - name: Build
         run: pipenv run build
