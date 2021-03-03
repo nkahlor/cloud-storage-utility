@@ -28,9 +28,6 @@ setuptools.setup(
     setup_requires=["setuptools_scm"],
     install_requires=[
         "click",
-        "setuptools",
-        "wheel",
-        "twine",
         "python-dotenv",
         "ibm-cos-sdk",
         "adal",
@@ -38,6 +35,8 @@ setuptools.setup(
         "azure-storage-file-datalake",
         "azure-datalake-store",
         "azure-identity",
+        "tqdm",
+        "colorama",
     ],
     python_requires=">=3.6",
 )
