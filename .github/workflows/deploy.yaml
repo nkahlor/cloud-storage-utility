@@ -22,6 +22,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Temp
+        if: github.head_ref == /ref/heads/development
+        run: echo "I worked"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
