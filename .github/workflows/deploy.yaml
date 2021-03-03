@@ -23,7 +23,11 @@ jobs:
 
       - name: Temp
         if: "github.event.release.prerelease"
-        run: echo "I worked"
+        run: echo "Is prerelease"
+
+      - name: Temp
+        if: "!github.event.release.prerelease"
+        run: echo "Is real release"
 
       # - name: Install dependencies
       #   run: |
