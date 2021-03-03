@@ -19,6 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pipenv
+          pipenv --python ${{ matrix.python-version }}
           pipenv install --dev --pre
 
       - name: Format
@@ -32,7 +33,9 @@ jobs:
           pipenv run mypy
 
       - name: Test
-        run: tox -e py
+        run: |
+          pipenv shell
+          tox -e py
 
       - name: Build
         run: pipenv run build
