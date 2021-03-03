@@ -39,6 +39,8 @@ pytest-cov = "*"
 pytest-asyncio = "*"
 mypy = "*"
 pdoc = "*"
+tox = "*"
+tox-pipenv = "*"
 
 [requires]
 python_version = "3.7"
