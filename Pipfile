@@ -5,7 +5,7 @@ name = "pypi"
 
 [scripts]
 test = "pytest"
-test-coverage = "pytest --cov-report html --cov=./cloud_storage_utility"
+test-coverage = "pytest --cov-report xml --cov ./cloud_storage_utility"
 format = "black ./cloud_storage_utility ./scripts ./tests"
 import-sort = "isort ./cloud_storage_utility ./scripts ./tests"
 lint = "flake8 ./cloud_storage_utility ./scripts ./tests"
@@ -14,10 +14,6 @@ documentation = "pdoc -o docs -d google ./cloud_storage_utility"
 
 [packages]
 click = "*"
-setuptools = "*"
-setuptools-scm = "*"
-wheel = "*"
-twine = "*"
 python-dotenv = "*"
 ibm-cos-sdk = "*"
 adal = "*"
@@ -27,9 +23,12 @@ azure-datalake-store = "*"
 azure-identity = "*"
 tqdm = "*"
 colorama = "*"
-pdoc = "*"
 
 [dev-packages]
+setuptools = "*"
+setuptools-scm = "*"
+wheel = "*"
+twine = "*"
 flake8 = "*"
 black = "*"
 isort = "*"
@@ -39,9 +38,8 @@ pytest-cov = "*"
 pytest-asyncio = "*"
 mypy = "*"
 pdoc = "*"
-
-[requires]
-python_version = "3.7"
+tox = "*"
+tox-pipenv = "*"
 
 [pipenv]
 allow_prereleases = true

@@ -2,18 +2,16 @@
 
 import fnmatch
 import glob
+import logging
 import os
 import sys
 
-from colorama import init, Fore, Style
-import logging
 import click
+from colorama import Fore, Style, init
 from tqdm import tqdm
-
 
 from .common.cloud_local_map import CloudLocalMap
 from .file_broker import FileBroker
-
 
 UNLIMITED_ARGS = -1
 COUNT = 0

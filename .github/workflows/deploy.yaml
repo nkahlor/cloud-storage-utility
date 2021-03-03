@@ -4,17 +4,15 @@ on:
   workflow_dispatch:
     branches:
       - ${GITHUB_REF##*/}
-  push:
-    branches:
-      - master
-      - development
+  release:
+    types: [published]
 
 jobs:
   build-n-publish:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7]
+        python-version: [3.9]
 
     steps:
       - uses: actions/checkout@v2
@@ -25,8 +23,10 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install pipenv
-          pipenv install
+          pipenv --python ${{ matrix.python-version }}
+          pipenv install --dev
 
       - name: Build
         run: pipenv run build
@@ -35,12 +35,25 @@ jobs:
         run: pipenv run documentation
 
       - name: Deploy Docs 🚀
-        if: startsWith(github.ref, 'refs/tags')
+        if: "!github.event.release.prerelease"
         uses: JamesIves/github-pages-deploy-action@4.0.0
         with:
           branch: main # The branch the action should deploy to.
           folder: docs # The folder the action should deploy.
 
+      - name: Generate coverage report
+        if: "!github.event.release.prerelease"
+        run: pipenv run test-coverage
+
+      - name: Upload coverage to Codecov
+        if: "!github.event.release.prerelease"
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true
+          path_to_write_report: ./coverage/codecov_report.txt
+          verbose: true
+
+      # No matter the type of release, send it here to test
       - name: Publish distribution 📦 to Test PyPI
         uses: pypa/gh-action-pypi-publish@master
         with:
@@ -48,8 +61,9 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
 
+      # Only upload it to official pypi if it's a genuine release, no pre-releases here!
       - name: Publish distribution 📦 to PyPI
-        if: startsWith(github.ref, 'refs/tags')
+        if: "!github.event.release.prerelease"
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__

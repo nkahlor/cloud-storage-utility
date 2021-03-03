@@ -15,15 +15,19 @@ setuptools.setup(
     scripts=["scripts/csutil"],
     classifiers=[
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    use_scm_version={
+        "write_to_template": '__version__ = "{version}"',
+    },
     setup_requires=["setuptools_scm"],
     install_requires=[
         "click",
-        "setuptools",
-        "wheel",
-        "twine",
         "python-dotenv",
         "ibm-cos-sdk",
         "adal",
@@ -31,6 +35,8 @@ setuptools.setup(
         "azure-storage-file-datalake",
         "azure-datalake-store",
         "azure-identity",
+        "tqdm",
+        "colorama",
     ],
     python_requires=">=3.6",
 )

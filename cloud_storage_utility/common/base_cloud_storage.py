@@ -1,7 +1,8 @@
 import abc
-from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
 import os
 from typing import Any, Callable, Coroutine, List
+
+from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
 
 # 5 MB chunks
 DEFAULT_PART_SIZE = 1024 * 1024 * 5
