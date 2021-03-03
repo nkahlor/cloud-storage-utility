@@ -4,71 +4,70 @@ on:
   workflow_dispatch:
     branches:
       - ${GITHUB_REF##*/}
-  push:
-    tags:
-      - "v*"
+  release:
+    types: [published]
 
 jobs:
   build-n-publish:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.9]
+    # strategy:
+    #   matrix:
+    #     python-version: [3.9]
 
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+    # steps:
+    #   - uses: actions/checkout@v2
+    #   - name: Set up Python ${{ matrix.python-version }}
+    #     uses: actions/setup-python@v2
+    #     with:
+    #       python-version: ${{ matrix.python-version }}
 
       - name: Temp
-        if: github.head_ref == 'refs/heads/development'
+        if: "github.event.release.prerelease"
         run: echo "I worked"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pipenv
-          pipenv --python ${{ matrix.python-version }}
-          pipenv install --dev
+      # - name: Install dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install pipenv
+      #     pipenv --python ${{ matrix.python-version }}
+      #     pipenv install --dev
 
-      - name: Build
-        run: pipenv run build
+      # - name: Build
+      #   run: pipenv run build
 
-      - name: Generate Docs
-        run: pipenv run documentation
+      # - name: Generate Docs
+      #   run: pipenv run documentation
 
-      - name: Deploy Docs 🚀
-        if: github.ref == 'refs/heads/main'
-        uses: JamesIves/github-pages-deploy-action@4.0.0
-        with:
-          branch: main # The branch the action should deploy to.
-          folder: docs # The folder the action should deploy.
+      # - name: Deploy Docs 🚀
+      #   if: github.ref == 'refs/heads/main'
+      #   uses: JamesIves/github-pages-deploy-action@4.0.0
+      #   with:
+      #     branch: main # The branch the action should deploy to.
+      #     folder: docs # The folder the action should deploy.
 
-      - name: Generate coverage report
-        if: github.ref == 'refs/heads/main'
-        run: pipenv run test-coverage
+      # - name: Generate coverage report
+      #   if: github.ref == 'refs/heads/main'
+      #   run: pipenv run test-coverage
 
-      - name: Upload coverage to Codecov
-        if: github.ref == 'refs/heads/main'
-        uses: codecov/codecov-action@v1
-        with:
-          fail_ci_if_error: true
-          path_to_write_report: ./coverage/codecov_report.txt
-          verbose: true
+      # - name: Upload coverage to Codecov
+      #   if: github.ref == 'refs/heads/main'
+      #   uses: codecov/codecov-action@v1
+      #   with:
+      #     fail_ci_if_error: true
+      #     path_to_write_report: ./coverage/codecov_report.txt
+      #     verbose: true
 
-      - name: Publish distribution 📦 to Test PyPI
-        if: github.ref == 'refs/heads/development'
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+      # - name: Publish distribution 📦 to Test PyPI
+      #   if: github.ref == 'refs/heads/development'
+      #   uses: pypa/gh-action-pypi-publish@master
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      #     repository_url: https://test.pypi.org/legacy/
 
-      - name: Publish distribution 📦 to PyPI
-        if: github.ref == 'refs/heads/main'
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+      # - name: Publish distribution 📦 to PyPI
+      #   if: github.ref == 'refs/heads/main'
+      #   uses: pypa/gh-action-pypi-publish@master
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.PYPI_API_TOKEN }}
