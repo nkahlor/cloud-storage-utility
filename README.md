@@ -7,6 +7,12 @@
 
 A Python based cloud utility to help you transfer files to and from multiple cloud providers under one CLI/API.
 
+## Installation
+
+```shell
+pip install cloud-storage-utility
+```
+
 ## Usage
 
 #### Configuration
