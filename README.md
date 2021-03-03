@@ -1,5 +1,7 @@
 # Cloud Storage Utility
 
+[![codecov](https://codecov.io/gh/nkahlor/cloud-storage-utility/branch/main/graph/badge.svg?token=JBO83HCV0T)](https://codecov.io/gh/nkahlor/cloud-storage-utility)
+
 A Python based cloud utility to help you transfer files to and from multiple cloud providers under one CLI/API.
 
 ## Usage
@@ -34,7 +36,7 @@ By default, the CLI will attempt to use IBM
 You can use `csutil --help` to see an exhaustive list of options and commands
 
 ```
-csutil delete <bucket name> <filename> 
+csutil delete <bucket name> <filename>
 csutil list-remote <bucket name>
 csutil pull <bucket name> <destination directory>  <cloud-files>
 csutil push <bucket name> <local-files>
@@ -43,7 +45,7 @@ csutil push <bucket name> <local-files>
 Here are some examples
 
 ```
-csutil delete example-bucket *.txt 
+csutil delete example-bucket *.txt
 csutil delete example-bucket *.txt *.md example.csv
 
 csutil list-remote example-bucket
