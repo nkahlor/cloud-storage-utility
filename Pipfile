@@ -5,7 +5,7 @@ name = "pypi"
 
 [scripts]
 test = "pytest"
-test-coverage = "pytest --cov-report html --cov=./cloud_storage_utility"
+test-coverage = "pytest --cov-report xml --cov ./cloud_storage_utility"
 format = "black ./cloud_storage_utility ./scripts ./tests"
 import-sort = "isort ./cloud_storage_utility ./scripts ./tests"
 lint = "flake8 ./cloud_storage_utility ./scripts ./tests"
@@ -39,9 +39,8 @@ pytest-cov = "*"
 pytest-asyncio = "*"
 mypy = "*"
 pdoc = "*"
-
-[requires]
-python_version = "3.7"
+tox = "*"
+tox-pipenv = "*"
 
 [pipenv]
 allow_prereleases = true

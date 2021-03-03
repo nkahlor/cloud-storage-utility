@@ -1,11 +1,12 @@
 """Routes cloud storage operations to underlying platform implementations."""
 
 import asyncio
-from cloud_storage_utility.common.base_cloud_storage import BaseCloudStorage
-from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
 import os
 from itertools import groupby
 from typing import Callable, List
+
+from cloud_storage_utility.common.base_cloud_storage import BaseCloudStorage
+from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
 
 from .config import config
 from .platforms.azure_cloud_storage import AzureCloudStorage
