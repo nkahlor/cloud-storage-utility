@@ -66,6 +66,23 @@ csutil push example-bucket ./dat/*
 csutil push example-bucket/test_directory ./dat/tmp.txt ./dat/tmp2.txt
 ```
 
+### Python API
+
+Example usage
+
+```python
+from cloud_storage_utility.file_broker import FileBroker
+
+
+broker = FileBroker()
+
+broker.download_files(
+    bucket_name="test-bucket",
+    local_directory="./data",
+    file_names=["tmp.txt1", "tmp2.txt"],
+)
+```
+
 ## Developing Locally
 
 We use `pipenv` to manage packages. If you don't already have it installed, make sure to install it via `pip install pipenv`.
