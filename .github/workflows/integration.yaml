@@ -38,5 +38,15 @@ jobs:
           pip install tox tox-gh-actions
           tox
 
+    - name: Generate coverage report
+      run: pipenv run test-coverage
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true
+        path_to_write_report: ./coverage/codecov_report.txt
+        verbose: true
+
       - name: Build
         run: pipenv run build
