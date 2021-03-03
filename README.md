@@ -72,19 +72,12 @@ We use `pipenv` to manage packages. If you don't already have it installed, make
 
 We also use `python-dotenv` for managing env vars for local development, so you can create a .env file for yourself and set the relevant vars that way.
 
-## Deploy to pypi
+```shell
+# You can use any python version, but I recommend 3.9
+pipenv --python 3.9
 
-Make sure you have the venv activated `pipenv shell`
+# Gotta use the pre flag because of the code formatter
+pipenv install --dev --pre
+```
 
-Build `python3 setup.py sdist bdist_wheel`
-
-Deploy `python3 -m twine upload --repository testpypi dist/*`
-
-Here's a good sample of a similar project https://github.com/pypa/sampleproject
-
-## Additional Resources
-
-- [InnerSource Marketplace](https://github.com/AAInternal/InnerSource-Marketplace)
-- [Meta](https://github.com/AAInternal/meta)
-- [TechRadar](https://github.com/AAInternal/TechRadar)
-- [Sourcerer.io](https://github.com/sourcerer-io/sourcerer-app#readme)
+Now you're all set to start writing code!
