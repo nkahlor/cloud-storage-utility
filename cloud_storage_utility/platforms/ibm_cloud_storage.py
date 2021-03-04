@@ -66,12 +66,14 @@ class IbmCloudStorage(BaseCloudStorage):
         return upload_succeeded
 
     async def remove_item(self, bucket_name, delete_request, callback=None):
-        self.__cos.Bucket(bucket_name).delete_objects(Delete=delete_request)
-
-        file_list = list(map(lambda x: x["Key"], delete_request["Objects"]))
-
-        if callback is not None:
-            callback(bucket_name, file_list, file_list)
+        try:
+            self.__cos.Bucket(bucket_name).delete_objects(Delete=delete_request)
+        except Exception as e:
+            logging.error(e)
+        finally:
+            file_list = list(map(lambda x: x["Key"], delete_request["Objects"]))
+            if callback is not None:
+                callback(bucket_name, file_list, file_list)
 
     # Overriding the parent function because we can make it more efficient
     def get_remove_items_coroutines(self, bucket_name, item_names, callback=None):
@@ -82,22 +84,19 @@ class IbmCloudStorage(BaseCloudStorage):
         # need many requests
         delete_requests = []
         delete_tasks = []
-        try:
-            request = []
-            for i, name in enumerate(item_names):
-                request.append({"Key": name})
-                # every time the index is a mod of 1000, we know that's a
-                # complete request
-                if (i + 1) % 1000 == 0:
-                    delete_requests.append({"Objects": request})
-                    # reset request list for the next iteration
-                    request = []
-            # append whatever is left over
-            if len(request) > 0:
+        request = []
+        for i, name in enumerate(item_names):
+            request.append({"Key": name})
+            # every time the index is a mod of 1000, we know that's a
+            # complete request
+            if (i + 1) % 1000 == 0:
                 delete_requests.append({"Objects": request})
+                # reset request list for the next iteration
+                request = []
 
-        except Exception as error:
-            logging.error(error)
+        # append whatever is left over
+        if len(request) > 0:
+            delete_requests.append({"Objects": request})
 
         for request in delete_requests:
             delete_tasks.append(self.remove_item(bucket_name, request, callback))
