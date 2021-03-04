@@ -10,6 +10,34 @@ class TestIbmCloudStorage:
     TEST_FILE_PATH = "test_data/test_data_1.txt"
     NONEXISTENT_FILE = "test_data/doesnt_exits.txt"
 
+    def mock_boto_get_bucket_keys(self, mocker, expected_keys):
+        class MockReturn:
+            def __init__(self, key):
+                self.key = key
+
+        return_vals = [MockReturn(key) for key in expected_keys]
+
+        # I apologize deeply for this fine Italian cuisine
+        mock_all = mocker.Mock()
+        mock_all.configure_mock(all=lambda: return_vals)
+        mock_objects = mocker.Mock()
+        mock_objects.configure_mock(objects=mock_all)
+        mock_bucket = mocker.Mock(return_value=mock_objects)
+
+        return mock_bucket
+
+    def test_get_bucket_keys_succeeds(self, mocker):
+        ibm_service = IbmCloudStorage()
+        expected_keys = ["test.txt", "test2.txt"]
+
+        mock_bucket = self.mock_boto_get_bucket_keys(mocker, expected_keys)
+
+        ibm_service._IbmCloudStorage__cos.Bucket = mock_bucket  # type: ignore
+
+        actual_keys = ibm_service.get_bucket_keys(self.TEST_BUCKET)
+
+        assert expected_keys == actual_keys
+
     @pytest.mark.asyncio
     async def test_upload_file_succeeds(self, mocker):
         ibm_service = IbmCloudStorage()
