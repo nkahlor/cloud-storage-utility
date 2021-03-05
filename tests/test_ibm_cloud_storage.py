@@ -274,3 +274,51 @@ class TestIbmCloudStorage:
 
         mock_download_file.download_file.assert_called()
         assert res is True
+
+    @pytest.mark.asyncio
+    async def test_download_file_logs_error_on_failure(self, mocker):
+        ibm_service = IbmCloudStorage()
+
+        ibm_service._IbmCloudStorage__cos.Object = mocker.Mock(  # type: ignore
+            side_effect=Exception("I failed :(")
+        )
+
+        res = await ibm_service.download_file(
+            self.TEST_BUCKET, "test.txt", "./test", None
+        )
+
+        assert res is False
+
+    @pytest.mark.asyncio
+    async def test_download_file_executes_callback_on_success(self, mocker):
+        ibm_service = IbmCloudStorage()
+
+        mock_callback = mocker.Mock()
+        mock_download_file = mocker.Mock()
+        ibm_service._IbmCloudStorage__cos.Object = mocker.Mock(  # type: ignore
+            return_value=mock_download_file
+        )
+
+        res = await ibm_service.download_file(
+            self.TEST_BUCKET, "test.txt", "./test", mock_callback
+        )
+
+        mock_download_file.download_file.assert_called()
+        assert res is True
+        mock_callback.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_download_file_executes_callback_on_failure(self, mocker):
+        ibm_service = IbmCloudStorage()
+
+        mock_callback = mocker.Mock()
+        ibm_service._IbmCloudStorage__cos.Object = mocker.Mock(  # type: ignore
+            side_effect=Exception("I failed :(")
+        )
+
+        res = await ibm_service.download_file(
+            self.TEST_BUCKET, "test.txt", "./test", mock_callback
+        )
+
+        assert res is False
+        mock_callback.assert_called()
