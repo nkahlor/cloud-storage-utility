@@ -196,6 +196,7 @@ def delete(cloud_bucket, cloud_key_wildcard):
 
     keys_to_delete = []
     for wildcard in cloud_key_wildcard:
+        wildcard = wildcard.strip()
         keys_to_delete += fnmatch.filter(bucket_contents, wildcard)
 
     if len(keys_to_delete) > 0:

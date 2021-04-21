@@ -1,6 +1,8 @@
 import logging
 import time
 import xmltodict
+import hashlib
+import base64
 
 import ibm_boto3
 from ibm_boto3.s3.transfer import TransferConfig
@@ -106,9 +108,25 @@ class IbmCloudStorage(BaseCloudStorage):
         return upload_succeeded
 
     async def remove_item(self, bucket_name, delete_request, callback=None):
-        self.__cos.Bucket(bucket_name).delete_objects(Delete=delete_request)
 
-        file_list = list(map(lambda x: x["Key"], delete_request["Objects"]))
+        xml_body = xmltodict.unparse({"Delete": delete_request})
+        access_token = await self.__get_auth_token()
+        md = hashlib.md5(xml_body.encode("utf-8")).digest()
+        contents_md5 = base64.b64encode(md).decode("utf-8")
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-MD5": contents_md5,
+            "Content-Type": "text/plain; charset=utf-8",
+        }
+        async with self.__session.post(
+            f"{self.__cos_endpoint}/{bucket_name}?delete=",
+            headers=headers,
+            data=xml_body,
+        ) as response:
+            dict_response = xmltodict.parse(await response.text())["DeleteResult"][
+                "Deleted"
+            ]
+            file_list = [elem["Key"] for elem in dict_response]
 
         if callback is not None:
             callback(bucket_name, file_list, file_list)
@@ -129,12 +147,12 @@ class IbmCloudStorage(BaseCloudStorage):
                 # every time the index is a mod of 1000, we know that's a
                 # complete request
                 if (i + 1) % 1000 == 0:
-                    delete_requests.append({"Objects": request})
+                    delete_requests.append({"Object": request})
                     # reset request list for the next iteration
                     request = []
             # append whatever is left over
             if len(request) > 0:
-                delete_requests.append({"Objects": request})
+                delete_requests.append({"Object": request})
 
         except Exception as error:
             logging.exception(error)

@@ -25,7 +25,15 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/csutil",
-            "args": ["list-remote", "kronos-training-input-stage"],
+            "args": ["list-remote", "kronos-testdata-nicky"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Clear Bucket",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/csutil",
+            "args": ["delete", "kronos-testdata-nicky", "* "],
             "console": "integratedTerminal"
         }
     ]
