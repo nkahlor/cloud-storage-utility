@@ -1,6 +1,5 @@
 """Root module for csutil CLI."""
 
-import asyncio
 import fnmatch
 import glob
 import logging
@@ -44,13 +43,10 @@ def __global_test_options(func):
     return func
 
 
-# loop = asyncio.get_event_loop()
-# if DESIRED_PLATFORM:
-#     file_broker = loop.run_until_complete(FileBroker.create(DESIRED_PLATFORM))
-# else:
-#     file_broker = loop.run_until_complete(FileBroker.create())
-
-file_broker = FileBroker()
+if DESIRED_PLATFORM:
+    file_broker = FileBroker(DESIRED_PLATFORM)
+else:
+    file_broker = FileBroker()
 
 
 def __local_file_exists(local_filepath):
