@@ -1,0 +1,24 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Upload Files",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/csutil",
+            "args": ["push", "kronos-testdata-nicky", "./dat/push_folder/*.txt "],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Download Files",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/csutil",
+            "args": ["pull", "kronos-testdata-nicky", "./dat/pull_folder", "* "],
+            "console": "integratedTerminal"
+        }
+    ]
+}

@@ -23,6 +23,7 @@ azure-datalake-store = "*"
 azure-identity = "*"
 tqdm = "*"
 colorama = "*"
+aiohttp = "*"
 
 [dev-packages]
 setuptools = "*"

@@ -1,4 +1,5 @@
 import logging
+import asyncio
 
 import ibm_boto3
 from ibm_boto3.s3.transfer import TransferConfig
@@ -12,12 +13,13 @@ from ..config import config
 class IbmCloudStorage(BaseCloudStorage):
     """File operation implementations for IBM platform."""
 
-    def __init__(self):
+    def __init__(self, session):
         super().__init__()
         self.__api_key = config.IBM_CONFIG["api_key"]
         self.__cos_crn = config.IBM_CONFIG["crn"]
         self.__auth_endpoint = config.IBM_CONFIG["auth_endpoint"]
         self.__cos_endpoint = config.IBM_CONFIG["cos_endpoint"]
+        self.__session = session
 
         self.__cos = self.__get_resource(
             self.__api_key, self.__cos_crn, self.__auth_endpoint, self.__cos_endpoint
@@ -109,14 +111,18 @@ class IbmCloudStorage(BaseCloudStorage):
     ):
         download_succeeded = None
         try:
-            self.__cos.Object(bucket_name, cloud_key).download_file(
-                Filename=destination_filepath,
-                Config=self.__get_transfer_config(use_threads=True),
-            )
+            access_token = await self.__get_auth_token()
+            headers = {"Authorization": f"Bearer {access_token}"}
+            async with self.__session.get(
+                f"{self.__cos_endpoint}/{bucket_name}/{cloud_key}",
+                headers=headers,
+            ) as response:
+                with open(destination_filepath, "w") as downloaded_file:
+                    downloaded_file.write(await response.text())
 
             download_succeeded = True
         except Exception as error:
-            logging.error(error)
+            logging.exception(error)
             download_succeeded = False
         finally:
             if callback is not None:
@@ -147,3 +153,15 @@ class IbmCloudStorage(BaseCloudStorage):
             config=Config(signature_version="oauth"),
             endpoint_url=cos_endpoint,
         )
+
+    async def __get_auth_token(self):
+        headers = {
+            "content-type": "application/x-www-form-urlencoded",
+            "accept": "application/json",
+        }
+        data = f"grant_type=urn%3Aibm%3Aparams%3Aoauth%3Agrant-type%3Aapikey&apikey={self.__api_key}"
+        async with self.__session.post(
+            self.__auth_endpoint, headers=headers, data=data
+        ) as response:
+            response = await response.json()
+            return response["access_token"]

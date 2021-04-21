@@ -1,5 +1,6 @@
 """Root module for csutil CLI."""
 
+import asyncio
 import fnmatch
 import glob
 import logging
@@ -43,10 +44,13 @@ def __global_test_options(func):
     return func
 
 
-if DESIRED_PLATFORM:
-    file_broker = FileBroker(DESIRED_PLATFORM)
-else:
-    file_broker = FileBroker()
+# loop = asyncio.get_event_loop()
+# if DESIRED_PLATFORM:
+#     file_broker = loop.run_until_complete(FileBroker.create(DESIRED_PLATFORM))
+# else:
+#     file_broker = loop.run_until_complete(FileBroker.create())
+
+file_broker = FileBroker()
 
 
 def __local_file_exists(local_filepath):
@@ -110,6 +114,7 @@ def push(fail_fast, local_file_pattern, cloud_bucket):
     patterns = list(local_file_pattern)
     cloud_map_list = []
     for pattern in patterns:
+        pattern = pattern.strip()
         pattern_expansion = glob.glob(pattern, recursive=False)
 
         # Only try to upload files, exclude any directories
@@ -161,6 +166,7 @@ def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards):
     # Filter out the ones we need
     keys_to_download = []
     for wildcard in cloud_key_wildcards:
+        wildcard = wildcard.strip()
         keys_to_download += fnmatch.filter(bucket_contents, wildcard)
 
     if len(keys_to_download) > 0:
@@ -170,6 +176,7 @@ def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards):
             unit="files",
             colour=PROGRESS_BAR_COLOR,
         )
+
         file_broker.download_files(
             cloud_bucket,
             destination_dir,
@@ -178,6 +185,7 @@ def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards):
                 "download", fail_fast, pbar, file_path, succeeded
             ),
         )
+
         pbar.close()
     else:
         print("No matching files found in the specified cloud bucket.")

@@ -4,6 +4,7 @@ import asyncio
 import os
 from itertools import groupby
 from typing import Callable, List
+import aiohttp
 
 from cloud_storage_utility.common.base_cloud_storage import BaseCloudStorage
 from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
@@ -17,14 +18,23 @@ class FileBroker:
     """Executes file operations with the specified underlying platform implementation."""
 
     def __init__(self, platform: str = config.DEFAULT_PLATFORM):
-        """Initialize service with specified platform. Defaults to IBM, because why not?"""
         self.platform = platform
+        loop = asyncio.get_event_loop()
+        self.session = loop.run_until_complete(self.__create_aiohttp_session())
         if platform == config.SupportedPlatforms.IBM:
-            self.service: BaseCloudStorage = IbmCloudStorage()
+            self.service = IbmCloudStorage(self.session)
         elif platform == config.SupportedPlatforms.AZURE:
             self.service = AzureCloudStorage()
         else:
             raise Exception("Cloud platform not supported")
+
+    def __del__(self):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.session.close())
+        loop.close()
+
+    async def __create_aiohttp_session(self):
+        return aiohttp.ClientSession()
 
     def get_bucket_keys(self, bucket_name: str) -> List[str]:
         """Get the names of all the keys in the bucket.
@@ -61,7 +71,6 @@ class FileBroker:
             bucket_name, cloud_map_list, callback
         )
         loop.run_until_complete(asyncio.gather(*upload_tasks))
-        loop.close()
 
     def download_files(
         self,
@@ -86,10 +95,9 @@ class FileBroker:
         """
         loop = asyncio.get_event_loop()
         download_tasks = self.service.get_download_files_coroutines(
-            local_directory, bucket_name, file_names, callback
+            bucket_name, local_directory, file_names, callback
         )
         loop.run_until_complete(asyncio.gather(*download_tasks))
-        loop.close()
 
     def remove_items(
         self,
@@ -115,7 +123,6 @@ class FileBroker:
             bucket_name, cloud_keys, callback
         )
         loop.run_until_complete(asyncio.gather(*remove_tasks))
-        loop.close()
 
     def sync_local_files(self, file_paths: List[str], bucket_name: str) -> None:
         """If any of the files in file_paths are missing locally, go get them from the cloud bucket.
