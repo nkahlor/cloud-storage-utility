@@ -4,11 +4,6 @@ import xmltodict
 import hashlib
 import base64
 
-import ibm_boto3
-from ibm_boto3.s3.transfer import TransferConfig
-from ibm_botocore.config import Config
-from ibm_botocore.exceptions import ClientError
-
 from ..common.base_cloud_storage import BaseCloudStorage
 from ..config import config
 
@@ -19,16 +14,11 @@ class IbmCloudStorage(BaseCloudStorage):
     def __init__(self, session):
         super().__init__()
         self.__api_key = config.IBM_CONFIG["api_key"]
-        self.__cos_crn = config.IBM_CONFIG["crn"]
         self.__auth_endpoint = config.IBM_CONFIG["auth_endpoint"]
         self.__cos_endpoint = config.IBM_CONFIG["cos_endpoint"]
         self.__session = session
         self.__expires_at = -1
         self.__access_token = ""
-
-        self.__cos = self.__get_resource(
-            self.__api_key, self.__cos_crn, self.__auth_endpoint, self.__cos_endpoint
-        )
 
     async def get_bucket_keys(self, bucket_name, prefix=None, delimiter=None):
         try:
@@ -190,25 +180,6 @@ class IbmCloudStorage(BaseCloudStorage):
                 )
 
         return download_succeeded
-
-    def __get_transfer_config(self, use_threads=True):
-        # set the transfer threshold and chunk size
-        return TransferConfig(
-            use_threads=use_threads,
-            multipart_threshold=self.file_threshold,
-            multipart_chunksize=self.part_size,
-        )
-
-    @staticmethod
-    def __get_resource(api_key, cos_crn, auth_endpoint, cos_endpoint):
-        return ibm_boto3.resource(
-            "s3",
-            ibm_api_key_id=api_key,
-            ibm_service_instance_id=cos_crn,
-            ibm_auth_endpoint=auth_endpoint,
-            config=Config(signature_version="oauth"),
-            endpoint_url=cos_endpoint,
-        )
 
     async def __get_auth_token(self):
         current_time = int(time.time())

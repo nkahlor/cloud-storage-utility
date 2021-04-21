@@ -15,7 +15,6 @@ documentation = "pdoc -o docs -d google ./cloud_storage_utility"
 [packages]
 click = "*"
 python-dotenv = "*"
-ibm-cos-sdk = "*"
 adal = "*"
 azure-mgmt-datalake-analytics = "*"
 azure-storage-file-datalake = "*"
