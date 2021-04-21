@@ -74,23 +74,24 @@ class IbmCloudStorage(BaseCloudStorage):
         return all_items
 
     async def upload_file(self, bucket_name, cloud_key, file_path, callback=None):
+        """
+        Note: This should only be used for files < 500MB. When you need to upload larger files, you have to
+        implement multi-part uploads.
+        """
         upload_succeeded = None
         try:
-            # the upload_fileobj method will automatically execute a multi-part upload
-            # in 5 MB chunks for all files over 15 MB
+            access_token = await self.__get_auth_token()
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+            }
             with open(file_path, "rb") as file_data:
-                self.__cos.Object(bucket_name, cloud_key).upload_fileobj(
-                    Fileobj=file_data,
-                    Config=self.__get_transfer_config(use_threads=True),
-                )
-
+                async with self.__session.put(
+                    f"{self.__cos_endpoint}/{bucket_name}/{cloud_key}",
+                    data=file_data,
+                    headers=headers,
+                ):
+                    pass
             upload_succeeded = True
-        except ClientError as client_error:
-            logging.exception(client_error)
-            upload_succeeded = False
-        except FileNotFoundError as fnf_error:
-            logging.exception(fnf_error)
-            upload_succeeded = False
         except Exception as error:
             logging.exception(error)
             upload_succeeded = False
