@@ -1,5 +1,6 @@
 import logging
-import asyncio
+import time
+import xmltodict
 
 import ibm_boto3
 from ibm_boto3.s3.transfer import TransferConfig
@@ -20,21 +21,57 @@ class IbmCloudStorage(BaseCloudStorage):
         self.__auth_endpoint = config.IBM_CONFIG["auth_endpoint"]
         self.__cos_endpoint = config.IBM_CONFIG["cos_endpoint"]
         self.__session = session
+        self.__expires_at = -1
+        self.__access_token = ""
 
         self.__cos = self.__get_resource(
             self.__api_key, self.__cos_crn, self.__auth_endpoint, self.__cos_endpoint
         )
 
-    def get_bucket_keys(self, bucket_name):
+    async def get_bucket_keys(self, bucket_name, prefix=None, delimiter=None):
         try:
-            files = self.__cos.Bucket(bucket_name).objects.all()
-            # I only want to return the keys
-            return_array = list(map(lambda x: x.key, files))
-        except Exception as error:
-            logging.error(error)
-            return []
+            access_token = await self.__get_auth_token()
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+            }
 
-        return return_array
+            params = {"list-type": "2"}
+            if prefix:
+                params = {"prefix": prefix, **params}
+            if delimiter:
+                params = {"delimiter": delimiter, **params}
+
+            all_items = {}
+            is_truncated = True
+            continuation_token = None
+            while is_truncated:
+                if continuation_token:
+                    params = {"continuation-token": continuation_token}
+                async with self.__session.get(
+                    f"{self.__cos_endpoint}/{bucket_name}?list-type=2",
+                    params=params,
+                    headers=headers,
+                ) as response:
+                    xml_response = await response.text()
+                    response_dict = xmltodict.parse(xml_response)["ListBucketResult"]
+                    items = {
+                        item["Key"]: {
+                            "last_modified": item["LastModified"],
+                            "bytes": item["Size"],
+                        }
+                        for item in response_dict["Contents"]
+                    }
+
+                    is_truncated = response_dict["IsTruncated"] == "true"
+                    if is_truncated:
+                        continuation_token = response_dict["NextContinuationToken"]
+                    all_items.update(items)
+
+        except Exception as error:
+            logging.exception(error)
+            return {}
+
+        return all_items
 
     async def upload_file(self, bucket_name, cloud_key, file_path, callback=None):
         upload_succeeded = None
@@ -49,13 +86,13 @@ class IbmCloudStorage(BaseCloudStorage):
 
             upload_succeeded = True
         except ClientError as client_error:
-            logging.error("Client error: {0}".format(client_error))
+            logging.exception(client_error)
             upload_succeeded = False
         except FileNotFoundError as fnf_error:
-            logging.error("File not found on local machine: {0}".format(fnf_error))
+            logging.exception(fnf_error)
             upload_succeeded = False
         except Exception as error:
-            logging.error("Unable to upload to bucket: {0}".format(error))
+            logging.exception(error)
             upload_succeeded = False
         finally:
             if callback is not None:
@@ -99,7 +136,7 @@ class IbmCloudStorage(BaseCloudStorage):
                 delete_requests.append({"Objects": request})
 
         except Exception as error:
-            logging.error(error)
+            logging.exception(error)
 
         for request in delete_requests:
             delete_tasks.append(self.remove_item(bucket_name, request, callback))
@@ -155,13 +192,18 @@ class IbmCloudStorage(BaseCloudStorage):
         )
 
     async def __get_auth_token(self):
-        headers = {
-            "content-type": "application/x-www-form-urlencoded",
-            "accept": "application/json",
-        }
-        data = f"grant_type=urn%3Aibm%3Aparams%3Aoauth%3Agrant-type%3Aapikey&apikey={self.__api_key}"
-        async with self.__session.post(
-            self.__auth_endpoint, headers=headers, data=data
-        ) as response:
-            response = await response.json()
-            return response["access_token"]
+        current_time = int(time.time())
+        if current_time >= self.__expires_at:
+            headers = {
+                "content-type": "application/x-www-form-urlencoded",
+                "accept": "application/json",
+            }
+            data = f"grant_type=urn%3Aibm%3Aparams%3Aoauth%3Agrant-type%3Aapikey&apikey={self.__api_key}"
+            async with self.__session.post(
+                self.__auth_endpoint, headers=headers, data=data
+            ) as response:
+                response = await response.json()
+                self.__expires_at = response["expiration"]
+                self.__access_token = response["access_token"]
+
+        return self.__access_token

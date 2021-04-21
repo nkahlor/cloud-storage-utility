@@ -98,3 +98,6 @@ pipenv install --dev --pre
 ```
 
 Now you're all set to start writing code!
+
+
+https://cloud.ibm.com/docs/cloud-object-storage?topic=cloud-object-storage-object-operations

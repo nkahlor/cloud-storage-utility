@@ -45,7 +45,8 @@ class FileBroker:
         Returns:
             List of keys from the targeted bucket
         """
-        return self.service.get_bucket_keys(bucket_name)
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(self.service.get_bucket_keys(bucket_name))
 
     def upload_files(
         self,

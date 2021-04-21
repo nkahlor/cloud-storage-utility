@@ -19,6 +19,14 @@
             "program": "${workspaceFolder}/scripts/csutil",
             "args": ["pull", "kronos-testdata-nicky", "./dat/pull_folder", "* "],
             "console": "integratedTerminal"
+        },
+        {
+            "name": "List Bucket",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/csutil",
+            "args": ["list-remote", "kronos-training-input-stage"],
+            "console": "integratedTerminal"
         }
     ]
 }
