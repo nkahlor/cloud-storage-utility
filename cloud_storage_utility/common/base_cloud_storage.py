@@ -101,7 +101,6 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
                     file.cloud_key,
                     file.local_filepath,
                     prefix,
-                    delimiter,
                     callback,
                 )
             )
