@@ -27,7 +27,7 @@ class IbmCloudStorage(BaseCloudStorage):
                 "Authorization": f"Bearer {access_token}",
             }
 
-            params = {"max-keys": 5}
+            params = {}
             if prefix:
                 params = {"prefix": prefix.strip(), **params}
             if delimiter:
@@ -42,7 +42,6 @@ class IbmCloudStorage(BaseCloudStorage):
                         "continuation-token": continuation_token,
                         "prefix": prefix,
                         "delimiter": delimiter,
-                        "max-keys": 5,
                     }
                 async with self.__session.get(
                     f"{self.__cos_endpoint}/{bucket_name}?list-type=2",
