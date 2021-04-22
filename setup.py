@@ -22,14 +22,15 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    setup_requires=["setuptools_scm"],
     use_scm_version={
         "write_to_template": '__version__ = "{version}"',
     },
-    setup_requires=["setuptools_scm"],
     install_requires=[
         "click",
         "python-dotenv",
-        "ibm-cos-sdk",
+        "aiohttp",
+        "xmltodict",
         "adal",
         "azure-mgmt-datalake-analytics",
         "azure-storage-file-datalake",

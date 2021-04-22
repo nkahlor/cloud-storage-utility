@@ -1,4 +1,12 @@
 {
   "python.linting.pylintEnabled": true,
-  "python.linting.lintOnSave": true
+  "python.linting.lintOnSave": true,
+  "cSpell.ignoreWords": [
+    "aapikey",
+    "adal",
+    "aibm",
+    "aoauth",
+    "aparams",
+    "mgmt"
+  ]
 }

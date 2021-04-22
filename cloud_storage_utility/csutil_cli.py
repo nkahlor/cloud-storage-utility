@@ -9,9 +9,9 @@ import sys
 import click
 from colorama import Fore, Style, init
 from tqdm import tqdm
-
 from .common.cloud_local_map import CloudLocalMap
 from .file_broker import FileBroker
+from setuptools_scm import get_version
 
 UNLIMITED_ARGS = -1
 COUNT = 0
@@ -23,6 +23,8 @@ DESIRED_PLATFORM = os.getenv("CSUTIL_DEFAULT_PLATFORM")
 
 init()
 logging.basicConfig(filename="csutil-error.log", level=logging.WARNING)
+
+__version__ = get_version(root="..", relative_to=__file__)
 
 _global_test_options = [
     click.option(
@@ -88,6 +90,7 @@ def __update_pbar_remove(pbar, files_deleted):
 
 
 @click.group()
+@click.version_option(__version__)
 def execute_cli():
     """Create a cli group in click."""
     pass
@@ -105,7 +108,19 @@ def list_remote(bucket_name):
 @__global_test_options
 @click.argument("cloud-bucket", type=click.STRING)
 @click.argument("local-file-pattern", type=click.STRING, nargs=UNLIMITED_ARGS)
-def push(fail_fast, local_file_pattern, cloud_bucket):
+@click.option(
+    "-p",
+    "--prefix",
+    type=click.STRING,
+    help="Prefix to prepend the filename with in the cloud",
+)
+@click.option(
+    "-d",
+    "--delimiter",
+    type=click.STRING,
+    help="Set the prefix delimiter",
+)
+def push(fail_fast, local_file_pattern, cloud_bucket, prefix, delimiter):
     """Push files from local machine to the cloud bucket."""
     patterns = list(local_file_pattern)
     cloud_map_list = []
@@ -151,6 +166,18 @@ def push(fail_fast, local_file_pattern, cloud_bucket):
 @click.argument("cloud-bucket", type=click.STRING)
 @click.argument("destination-dir", type=click.Path(exists=True, file_okay=False))
 @click.argument("cloud-key-wildcards", type=click.STRING, nargs=UNLIMITED_ARGS)
+@click.option(
+    "-p",
+    "--prefix",
+    type=click.STRING,
+    help="Only pull files with matching prefix",
+)
+@click.option(
+    "-d",
+    "--delimiter",
+    type=click.STRING,
+    help="Set the prefix delimiter",
+)
 def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards):
     """Pull files from the cloud bucket to the local machine.
 
@@ -190,6 +217,18 @@ def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards):
 @execute_cli.command()
 @click.argument("cloud-bucket", type=click.STRING)
 @click.argument("cloud-key-wildcard", type=click.STRING, nargs=UNLIMITED_ARGS)
+@click.option(
+    "-p",
+    "--prefix",
+    type=click.STRING,
+    help="Only delete files with matching prefix",
+)
+@click.option(
+    "-d",
+    "--delimiter",
+    type=click.STRING,
+    help="Set the prefix delimiter",
+)
 def delete(cloud_bucket, cloud_key_wildcard):
     """Delete files from the cloud bucket."""
     bucket_contents = file_broker.get_bucket_keys(cloud_bucket)

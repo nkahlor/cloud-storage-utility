@@ -4,9 +4,9 @@ import asyncio
 import os
 from itertools import groupby
 from typing import Callable, List
+
 import aiohttp
 
-from cloud_storage_utility.common.base_cloud_storage import BaseCloudStorage
 from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
 
 from .config import config

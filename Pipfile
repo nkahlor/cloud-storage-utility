@@ -24,6 +24,7 @@ tqdm = "*"
 colorama = "*"
 aiohttp = "*"
 xmltodict = "*"
+importlib-metadata = "*"
 
 [dev-packages]
 setuptools = "*"
