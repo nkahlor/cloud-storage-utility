@@ -7,6 +7,9 @@
 
 A Python based cloud utility to help you transfer files to and from multiple cloud providers under one CLI/API.
 
+
+Note: Support for Azure is experimental, first priority is IBM!
+
 ## Installation
 
 ```shell
@@ -27,7 +30,6 @@ CSUTIL_CLOUD_PLATFORM=
 CSUTIL_IBM_API_KEY=
 CSUTIL_IBM_AUTH_ENDPOINT=
 CSUTIL_IBM_COS_ENDPOINT=
-CSUTIL_IBM_CRN=
 
 # You only need to set these if you intend to use azure
 CSUTIL_AZURE_STORAGE_ACCOUNT_NAME=
@@ -39,6 +41,7 @@ CSUTIL_AZURE_CLIENT_SECRET=
 ```
 
 By default, the CLI will attempt to use IBM
+Note: for IBM, if `CSUTIL_IBM_API_KEY` is undefined, we will attempt to use `IBMCLOUD_API_KEY` instead.
 
 #### CLI Commands
 
