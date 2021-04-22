@@ -99,9 +99,19 @@ def execute_cli():
 # TODO: Allow filtering of these keys so we can search the contents of a bucket
 @execute_cli.command()
 @click.argument("bucket-name", type=click.STRING)
-def list_remote(bucket_name):
+@click.option(
+    "-p",
+    "--prefix",
+    type=click.STRING,
+    help="Prefix to prepend the filename with in the cloud",
+    default="",
+)
+@click.option(
+    "-d", "--delimiter", type=click.STRING, help="Set the prefix delimiter", default="/"
+)
+def list_remote(bucket_name, prefix, delimiter):
     """List contents of cloud bucket."""
-    print(*file_broker.get_bucket_keys(bucket_name), sep="\n")
+    print(*file_broker.get_bucket_keys(bucket_name, prefix, delimiter), sep="\n")
 
 
 @execute_cli.command()
@@ -151,6 +161,8 @@ def push(fail_fast, local_file_pattern, cloud_bucket, prefix, delimiter):
         file_broker.upload_files(
             cloud_bucket,
             cloud_map_list,
+            prefix,
+            delimiter,
             lambda bucket_name, cloud_key, file_path, succeeded: __update_pbar_with_filenames(
                 "upload", fail_fast, pbar, file_path, succeeded
             ),

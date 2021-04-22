@@ -73,6 +73,8 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         self,
         bucket_name: str,
         cloud_map_list: List[CloudLocalMap],
+        prefix: str = None,
+        delimiter: str = None,
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> List[Coroutine[Any, Any, None]]:
         """Collect all of the coroutines necessary to complete the requested uploads.
@@ -94,7 +96,12 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         for file in cloud_map_list:
             upload_tasks.append(
                 self.upload_file(
-                    bucket_name, file.cloud_key, file.local_filepath, callback
+                    bucket_name,
+                    file.cloud_key,
+                    file.local_filepath,
+                    prefix,
+                    delimiter,
+                    callback,
                 )
             )
 

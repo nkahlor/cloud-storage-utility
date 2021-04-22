@@ -27,9 +27,9 @@ class IbmCloudStorage(BaseCloudStorage):
                 "Authorization": f"Bearer {access_token}",
             }
 
-            params = {"list-type": "2"}
+            params = {"max-keys": 5}
             if prefix:
-                params = {"prefix": prefix, **params}
+                params = {"prefix": prefix.strip(), **params}
             if delimiter:
                 params = {"delimiter": delimiter, **params}
 
@@ -38,7 +38,12 @@ class IbmCloudStorage(BaseCloudStorage):
             continuation_token = None
             while is_truncated:
                 if continuation_token:
-                    params = {"continuation-token": continuation_token}
+                    params = {
+                        "continuation-token": continuation_token,
+                        "prefix": prefix,
+                        "delimiter": delimiter,
+                        "max-keys": 5,
+                    }
                 async with self.__session.get(
                     f"{self.__cos_endpoint}/{bucket_name}?list-type=2",
                     params=params,
@@ -46,18 +51,29 @@ class IbmCloudStorage(BaseCloudStorage):
                 ) as response:
                     xml_response = await response.text()
                     response_dict = xmltodict.parse(xml_response)["ListBucketResult"]
-                    items = {
-                        item["Key"]: {
-                            "last_modified": item["LastModified"],
-                            "bytes": item["Size"],
-                        }
-                        for item in response_dict["Contents"]
-                    }
+                    if "Contents" in response_dict:
+                        if "Key" in response_dict["Contents"]:
+                            item = response_dict["Contents"]
+                            items = {
+                                item["Key"]: {
+                                    "last_modified": item["LastModified"],
+                                    "bytes": item["Size"],
+                                }
+                            }
+                        else:
+                            items = {
+                                item["Key"]: {
+                                    "last_modified": item["LastModified"],
+                                    "bytes": item["Size"],
+                                }
+                                for item in response_dict["Contents"]
+                            }
+
+                        all_items.update(items)
 
                     is_truncated = response_dict["IsTruncated"] == "true"
                     if is_truncated:
                         continuation_token = response_dict["NextContinuationToken"]
-                    all_items.update(items)
 
         except Exception as error:
             logging.exception(error)
@@ -65,7 +81,15 @@ class IbmCloudStorage(BaseCloudStorage):
 
         return all_items
 
-    async def upload_file(self, bucket_name, cloud_key, file_path, callback=None):
+    async def upload_file(
+        self,
+        bucket_name,
+        cloud_key,
+        file_path,
+        prefix=None,
+        delimiter=None,
+        callback=None,
+    ):
         """
         Note: This should only be used for files < 500MB. When you need to upload larger files, you have to
         implement multi-part uploads.
@@ -76,6 +100,10 @@ class IbmCloudStorage(BaseCloudStorage):
             headers = {
                 "Authorization": f"Bearer {access_token}",
             }
+
+            if prefix and delimiter:
+                cloud_key = f"{prefix}{delimiter}{cloud_key}"
+
             with open(file_path, "rb") as file_data:
                 async with self.__session.put(
                     f"{self.__cos_endpoint}/{bucket_name}/{cloud_key}",

@@ -36,7 +36,9 @@ class FileBroker:
     async def __create_aiohttp_session(self):
         return aiohttp.ClientSession()
 
-    def get_bucket_keys(self, bucket_name: str) -> List[str]:
+    def get_bucket_keys(
+        self, bucket_name: str, prefix: str = None, delimiter: str = None
+    ) -> List[str]:
         """Get the names of all the keys in the bucket.
 
         Args:
@@ -46,12 +48,16 @@ class FileBroker:
             List of keys from the targeted bucket
         """
         loop = asyncio.get_event_loop()
-        return loop.run_until_complete(self.service.get_bucket_keys(bucket_name))
+        return loop.run_until_complete(
+            self.service.get_bucket_keys(bucket_name, prefix, delimiter)
+        )
 
     def upload_files(
         self,
         bucket_name: str,
         cloud_map_list: List[CloudLocalMap],
+        prefix: str = None,
+        delimiter: str = None,
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> None:
         """Upload a list of files from a local directory, and map them to they respective cloud keys in a particular bucket.
@@ -69,7 +75,7 @@ class FileBroker:
         loop = asyncio.get_event_loop()
 
         upload_tasks = self.service.get_upload_files_coroutines(
-            bucket_name, cloud_map_list, callback
+            bucket_name, cloud_map_list, prefix, delimiter, callback
         )
         loop.run_until_complete(asyncio.gather(*upload_tasks))
 
@@ -78,6 +84,8 @@ class FileBroker:
         bucket_name: str,
         local_directory: str,
         file_names: List[str],
+        prefix: str = None,
+        delimiter: str = None,
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> None:
         """Download all of the requested files from the bucket, and place them in the specified directory.
@@ -104,6 +112,8 @@ class FileBroker:
         self,
         bucket_name: str,
         cloud_keys: List[str],
+        prefix: str = None,
+        delimiter: str = None,
         callback: Callable[[str, str, str], None] = None,
     ) -> None:
         """Remove the specified keys from the bucket. Does not remove local files.
@@ -125,7 +135,13 @@ class FileBroker:
         )
         loop.run_until_complete(asyncio.gather(*remove_tasks))
 
-    def sync_local_files(self, file_paths: List[str], bucket_name: str) -> None:
+    def sync_local_files(
+        self,
+        file_paths: List[str],
+        bucket_name: str,
+        prefix: str = None,
+        delimiter: str = None,
+    ) -> None:
         """If any of the files in file_paths are missing locally, go get them from the cloud bucket.
 
         We assume the name of a file in a file path is the same as the name of the file we want to download.
