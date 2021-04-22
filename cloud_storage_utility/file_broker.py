@@ -74,7 +74,7 @@ class FileBroker:
         loop = asyncio.get_event_loop()
 
         upload_tasks = self.service.get_upload_files_coroutines(
-            bucket_name, cloud_map_list, prefix, delimiter, callback
+            bucket_name, cloud_map_list, prefix, callback
         )
         loop.run_until_complete(asyncio.gather(*upload_tasks))
 
