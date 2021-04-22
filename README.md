@@ -37,6 +37,9 @@ CSUTIL_AZURE_TENANT_ID=
 CSUTIL_AZURE_CLIENT_ID=
 CSUTIL_AZURE_CLIENT_SECRET=
 
+# You can also just include the connections string instead!
+CSUTIL_AZURE_CONNECTION_STRING=
+
 # set them all if you intend to use this tool for both platforms
 ```
 

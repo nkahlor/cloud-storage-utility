@@ -8,7 +8,6 @@ Takes environment variables and puts them into dictionaries.
     | CSUTIL_IBM_API_KEY       	| IBM_CONFIG['api_key']       	|
     | CSUTIL_IBM_AUTH_ENDPOINT 	| IBM_CONFIG['auth_endpoint'] 	|
     | CSUTIL_IBM_COS_ENDPOINT  	| IBM_CONFIG['cos_endpoint']  	|
-    | CSUTIL_IBM_CRN           	| IBM_CONFIG['crn']           	|
 
 #### Azure
     | Environment Variable              	| Config Dictionary                    	|
@@ -34,20 +33,19 @@ class SupportedPlatforms:
     IBM = "ibm"
 
 
-def __get_from_env(key):
+def __get_from_env(key, backup=None):
     value = os.getenv(key)
-    # if value is None:
-    #     print(f"{key} missing from environment")
+    if backup and not value:
+        return os.getenv(backup)
     return value
 
 
 DEFAULT_PLATFORM = SupportedPlatforms.IBM
 
 IBM_CONFIG = {
-    "api_key": __get_from_env("CSUTIL_IBM_API_KEY"),
+    "api_key": __get_from_env("CSUTIL_IBM_API_KEY", backup="IBMCLOUD_API_KEY"),
     "auth_endpoint": __get_from_env("CSUTIL_IBM_AUTH_ENDPOINT"),
     "cos_endpoint": __get_from_env("CSUTIL_IBM_COS_ENDPOINT"),
-    "crn": __get_from_env("CSUTIL_IBM_CRN"),
 }
 
 AZURE_CONFIG = {
