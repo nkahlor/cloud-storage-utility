@@ -57,7 +57,6 @@ class FileBroker:
         bucket_name: str,
         cloud_map_list: List[CloudLocalMap],
         prefix: str = None,
-        delimiter: str = None,
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> None:
         """Upload a list of files from a local directory, and map them to they respective cloud keys in a particular bucket.
@@ -85,7 +84,6 @@ class FileBroker:
         local_directory: str,
         file_names: List[str],
         prefix: str = None,
-        delimiter: str = None,
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> None:
         """Download all of the requested files from the bucket, and place them in the specified directory.
@@ -104,7 +102,7 @@ class FileBroker:
         """
         loop = asyncio.get_event_loop()
         download_tasks = self.service.get_download_files_coroutines(
-            bucket_name, local_directory, file_names, callback
+            bucket_name, local_directory, file_names, prefix, callback
         )
         loop.run_until_complete(asyncio.gather(*download_tasks))
 
@@ -113,7 +111,6 @@ class FileBroker:
         bucket_name: str,
         cloud_keys: List[str],
         prefix: str = None,
-        delimiter: str = None,
         callback: Callable[[str, str, str], None] = None,
     ) -> None:
         """Remove the specified keys from the bucket. Does not remove local files.
@@ -140,7 +137,6 @@ class FileBroker:
         file_paths: List[str],
         bucket_name: str,
         prefix: str = None,
-        delimiter: str = None,
     ) -> None:
         """If any of the files in file_paths are missing locally, go get them from the cloud bucket.
 

@@ -69,7 +69,7 @@ def __update_pbar_with_filenames(action, fail_fast, pbar, filename, succeeded):
         return
 
     pbar.update()
-    filename = os.path.basename(filename)
+    filename = filename
     if succeeded:
         pbar.write(
             f"{Fore.GREEN}{Style.BRIGHT}Success{Style.NORMAL}: {action}ed {filename}{Style.RESET_ALL}"
@@ -122,15 +122,10 @@ def list_remote(bucket_name, prefix, delimiter):
     "-p",
     "--prefix",
     type=click.STRING,
-    help="Prefix to prepend the filename with in the cloud",
+    help="Only pull files with matching prefix",
+    default="",
 )
-@click.option(
-    "-d",
-    "--delimiter",
-    type=click.STRING,
-    help="Set the prefix delimiter",
-)
-def push(fail_fast, local_file_pattern, cloud_bucket, prefix, delimiter):
+def push(fail_fast, local_file_pattern, cloud_bucket, prefix):
     """Push files from local machine to the cloud bucket."""
     patterns = list(local_file_pattern)
     cloud_map_list = []
@@ -162,7 +157,6 @@ def push(fail_fast, local_file_pattern, cloud_bucket, prefix, delimiter):
             cloud_bucket,
             cloud_map_list,
             prefix,
-            delimiter,
             lambda bucket_name, cloud_key, file_path, succeeded: __update_pbar_with_filenames(
                 "upload", fail_fast, pbar, file_path, succeeded
             ),
@@ -183,20 +177,15 @@ def push(fail_fast, local_file_pattern, cloud_bucket, prefix, delimiter):
     "--prefix",
     type=click.STRING,
     help="Only pull files with matching prefix",
+    default="",
 )
-@click.option(
-    "-d",
-    "--delimiter",
-    type=click.STRING,
-    help="Set the prefix delimiter",
-)
-def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards):
+def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards, prefix):
     """Pull files from the cloud bucket to the local machine.
 
     IMPORTANT: WRAP YOUR WILDCARDS IN QUOTES
     """
     # Get the names of all the files in the bucket
-    bucket_contents = file_broker.get_bucket_keys(cloud_bucket)
+    bucket_contents = file_broker.get_bucket_keys(cloud_bucket, prefix)
 
     # Filter out the ones we need
     keys_to_download = []
@@ -216,6 +205,7 @@ def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards):
             cloud_bucket,
             destination_dir,
             keys_to_download,
+            prefix,
             lambda bucket_name, cloud_key, file_path, succeeded: __update_pbar_with_filenames(
                 "download", fail_fast, pbar, file_path, succeeded
             ),
@@ -233,15 +223,10 @@ def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards):
     "-p",
     "--prefix",
     type=click.STRING,
-    help="Only delete files with matching prefix",
+    help="Only pull files with matching prefix",
+    default="",
 )
-@click.option(
-    "-d",
-    "--delimiter",
-    type=click.STRING,
-    help="Set the prefix delimiter",
-)
-def delete(cloud_bucket, cloud_key_wildcard):
+def delete(cloud_bucket, cloud_key_wildcard, prefix):
     """Delete files from the cloud bucket."""
     bucket_contents = file_broker.get_bucket_keys(cloud_bucket)
 

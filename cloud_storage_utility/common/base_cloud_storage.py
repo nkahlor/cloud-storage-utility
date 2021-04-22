@@ -1,4 +1,5 @@
 import abc
+from cloud_storage_utility.common.util import strip_prefix
 import os
 from typing import Any, Callable, Coroutine, List
 
@@ -53,6 +54,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         bucket_name: str,
         cloud_key: str,
         file_path: str,
+        prefix: str = None,
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> None:
         """An implementation fo this must provide a way to upload a single file.
@@ -74,7 +76,6 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         bucket_name: str,
         cloud_map_list: List[CloudLocalMap],
         prefix: str = None,
-        delimiter: str = None,
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> List[Coroutine[Any, Any, None]]:
         """Collect all of the coroutines necessary to complete the requested uploads.
@@ -162,6 +163,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         bucket_name: str,
         cloud_key: str,
         destination_filepath: str,
+        prefix: str = None,
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> None:
         """An implementation for this must provide a way to download a single file.
@@ -183,6 +185,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         bucket_name: str,
         local_directory: str,
         cloud_key_list: List[str],
+        prefix=None,
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> List[Coroutine[Any, Any, None]]:
         """Get a list of all the coroutines needed to perform the requested download.
@@ -208,7 +211,10 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
                 self.download_file(
                     bucket_name=bucket_name,
                     cloud_key=item,
-                    destination_filepath=os.path.join(local_directory, item),
+                    destination_filepath=os.path.join(
+                        local_directory, strip_prefix(item, prefix)
+                    ),
+                    prefix=prefix,
                     callback=callback,
                 )
             )

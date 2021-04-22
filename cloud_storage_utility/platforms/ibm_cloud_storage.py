@@ -86,7 +86,6 @@ class IbmCloudStorage(BaseCloudStorage):
         cloud_key,
         file_path,
         prefix=None,
-        delimiter=None,
         callback=None,
     ):
         """
@@ -100,8 +99,8 @@ class IbmCloudStorage(BaseCloudStorage):
                 "Authorization": f"Bearer {access_token}",
             }
 
-            if prefix and delimiter:
-                cloud_key = f"{prefix}{delimiter}{cloud_key}"
+            if prefix:
+                cloud_key = f"{prefix}{cloud_key}"
 
             with open(file_path, "rb") as file_data:
                 async with self.__session.put(
@@ -180,10 +179,17 @@ class IbmCloudStorage(BaseCloudStorage):
         return delete_tasks
 
     async def download_file(
-        self, bucket_name, cloud_key, destination_filepath, callback=None
+        self,
+        bucket_name,
+        cloud_key,
+        destination_filepath,
+        prefix: str = None,
+        callback=None,
     ):
         download_succeeded = None
         try:
+            if prefix:
+                cloud_key = f"{prefix}{cloud_key}"
             access_token = await self.__get_auth_token()
             headers = {"Authorization": f"Bearer {access_token}"}
             async with self.__session.get(
