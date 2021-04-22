@@ -41,6 +41,7 @@ mypy = "*"
 pdoc = "*"
 tox = "*"
 tox-pipenv = "*"
+aioresponses = "*"
 
 [pipenv]
 allow_prereleases = true

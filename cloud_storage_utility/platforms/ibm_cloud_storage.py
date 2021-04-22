@@ -123,32 +123,40 @@ class IbmCloudStorage(BaseCloudStorage):
                 )
         return upload_succeeded
 
-    async def remove_item(self, bucket_name, delete_request, callback=None):
-
-        xml_body = xmltodict.unparse({"Delete": delete_request})
-        access_token = await self.__get_auth_token()
-        md = hashlib.md5(xml_body.encode("utf-8")).digest()
-        contents_md5 = base64.b64encode(md).decode("utf-8")
-        headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-MD5": contents_md5,
-            "Content-Type": "text/plain; charset=utf-8",
-        }
-        async with self.__session.post(
-            f"{self.__cos_endpoint}/{bucket_name}?delete=",
-            headers=headers,
-            data=xml_body,
-        ) as response:
-            dict_response = xmltodict.parse(await response.text())["DeleteResult"][
-                "Deleted"
-            ]
-            file_list = [elem["Key"] for elem in dict_response]
-
-        if callback is not None:
-            callback(bucket_name, file_list, file_list)
+    async def remove_item(self, bucket_name, delete_request, prefix="", callback=None):
+        try:
+            xml_body = xmltodict.unparse({"Delete": delete_request})
+            access_token = await self.__get_auth_token()
+            md = hashlib.md5(xml_body.encode("utf-8")).digest()
+            contents_md5 = base64.b64encode(md).decode("utf-8")
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-MD5": contents_md5,
+                "Content-Type": "text/plain; charset=utf-8",
+            }
+            async with self.__session.post(
+                f"{self.__cos_endpoint}/{bucket_name}?delete=",
+                headers=headers,
+                data=xml_body,
+            ) as response:
+                dict_response = xmltodict.parse(await response.text())["DeleteResult"][
+                    "Deleted"
+                ]
+                # This is just dealing with a quirk in the xml parser, if only s3 used json like a normal person :(
+                if "Key" in dict_response:
+                    file_list = [dict_response["Key"]]
+                else:
+                    file_list = [elem["Key"] for elem in dict_response]
+        except Exception as error:
+            logging.exception(error)
+        finally:
+            if callback is not None:
+                callback(bucket_name, file_list)
 
     # Overriding the parent function because we can make it more efficient
-    def get_remove_items_coroutines(self, bucket_name, item_names, callback=None):
+    def get_remove_items_coroutines(
+        self, bucket_name, item_names, prefix="", callback=None
+    ):
         # do nothing
         if len(item_names) == 0:
             return []
@@ -174,7 +182,9 @@ class IbmCloudStorage(BaseCloudStorage):
             logging.exception(error)
 
         for request in delete_requests:
-            delete_tasks.append(self.remove_item(bucket_name, request, callback))
+            delete_tasks.append(
+                self.remove_item(bucket_name, request, prefix, callback)
+            )
 
         return delete_tasks
 

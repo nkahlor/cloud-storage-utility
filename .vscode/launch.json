@@ -6,7 +6,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/csutil",
-            "args": ["push", "-p", "20200220/", "kronos-testdata-nicky", "./dat/push_folder/*.txt "],
+            "args": ["push", "-p", "20200220/", "kronos-testdata-nicky", "./dat/push_folder/datafile-0.txt "],
             "console": "integratedTerminal"
         },
         {

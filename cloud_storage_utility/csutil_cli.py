@@ -1,17 +1,20 @@
 """Root module for csutil CLI."""
 
+import asyncio
 import fnmatch
 import glob
 import logging
 import os
 import sys
+from functools import update_wrapper
 
 import click
 from colorama import Fore, Style, init
+from setuptools_scm import get_version
 from tqdm import tqdm
+
 from .common.cloud_local_map import CloudLocalMap
 from .file_broker import FileBroker
-from setuptools_scm import get_version
 
 UNLIMITED_ARGS = -1
 COUNT = 0
@@ -45,10 +48,16 @@ def __global_test_options(func):
     return func
 
 
-if DESIRED_PLATFORM:
-    file_broker = FileBroker(DESIRED_PLATFORM)
-else:
-    file_broker = FileBroker()
+def run_async(func):
+    """
+    Allows you to run a click command asynchronously.
+    """
+    func = asyncio.coroutine(func)
+
+    def inner_handler(*args, **kwargs):
+        asyncio.run(func(*args, **kwargs))
+
+    return update_wrapper(inner_handler, func)
 
 
 def __local_file_exists(local_filepath):
@@ -86,7 +95,9 @@ def __update_pbar_with_filenames(action, fail_fast, pbar, filename, succeeded):
 def __update_pbar_remove(pbar, files_deleted):
     pbar.update(len(files_deleted))
     for file in files_deleted:
-        pbar.write(file)
+        pbar.write(
+            f"{Fore.GREEN}{Style.BRIGHT}Success{Style.NORMAL}: deleted {file}{Style.RESET_ALL}"
+        )
 
 
 @click.group()
@@ -109,9 +120,12 @@ def execute_cli():
 @click.option(
     "-d", "--delimiter", type=click.STRING, help="Set the prefix delimiter", default="/"
 )
-def list_remote(bucket_name, prefix, delimiter):
+@run_async
+async def list_remote(bucket_name, prefix, delimiter):
     """List contents of cloud bucket."""
-    print(*file_broker.get_bucket_keys(bucket_name, prefix, delimiter), sep="\n")
+    async with FileBroker() as file_broker:
+        keys = await file_broker.get_bucket_keys(bucket_name, prefix, delimiter)
+        print(*keys, sep="\n")
 
 
 @execute_cli.command()
@@ -125,7 +139,8 @@ def list_remote(bucket_name, prefix, delimiter):
     help="Only pull files with matching prefix",
     default="",
 )
-def push(fail_fast, local_file_pattern, cloud_bucket, prefix):
+@run_async
+async def push(fail_fast, local_file_pattern, cloud_bucket, prefix):
     """Push files from local machine to the cloud bucket."""
     patterns = list(local_file_pattern)
     cloud_map_list = []
@@ -152,15 +167,15 @@ def push(fail_fast, local_file_pattern, cloud_bucket, prefix):
             unit=PROGRESS_BAR_UNITS,
             colour=PROGRESS_BAR_COLOR,
         )
-
-        file_broker.upload_files(
-            cloud_bucket,
-            cloud_map_list,
-            prefix,
-            lambda bucket_name, cloud_key, file_path, succeeded: __update_pbar_with_filenames(
-                "upload", fail_fast, pbar, file_path, succeeded
-            ),
-        )
+        async with FileBroker() as file_broker:
+            await file_broker.upload_files(
+                cloud_bucket,
+                cloud_map_list,
+                prefix,
+                lambda bucket_name, cloud_key, file_path, succeeded: __update_pbar_with_filenames(
+                    "upload", fail_fast, pbar, file_path, succeeded
+                ),
+            )
 
         pbar.close()
     else:
@@ -179,41 +194,43 @@ def push(fail_fast, local_file_pattern, cloud_bucket, prefix):
     help="Only pull files with matching prefix",
     default="",
 )
-def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards, prefix):
+@run_async
+async def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards, prefix):
     """Pull files from the cloud bucket to the local machine.
 
     IMPORTANT: WRAP YOUR WILDCARDS IN QUOTES
     """
     # Get the names of all the files in the bucket
-    bucket_contents = file_broker.get_bucket_keys(cloud_bucket, prefix)
+    async with FileBroker() as file_broker:
+        bucket_contents = await file_broker.get_bucket_keys(cloud_bucket, prefix)
 
-    # Filter out the ones we need
-    keys_to_download = []
-    for wildcard in cloud_key_wildcards:
-        wildcard = wildcard.strip()
-        keys_to_download += fnmatch.filter(bucket_contents, wildcard)
+        # Filter out the ones we need
+        keys_to_download = []
+        for wildcard in cloud_key_wildcards:
+            wildcard = wildcard.strip()
+            keys_to_download += fnmatch.filter(bucket_contents, wildcard)
 
-    if len(keys_to_download) > 0:
-        pbar = tqdm(
-            total=len(keys_to_download),
-            desc="Downloading",
-            unit="files",
-            colour=PROGRESS_BAR_COLOR,
-        )
+        if len(keys_to_download) > 0:
+            pbar = tqdm(
+                total=len(keys_to_download),
+                desc="Downloading",
+                unit="files",
+                colour=PROGRESS_BAR_COLOR,
+            )
 
-        file_broker.download_files(
-            cloud_bucket,
-            destination_dir,
-            keys_to_download,
-            prefix,
-            lambda bucket_name, cloud_key, file_path, succeeded: __update_pbar_with_filenames(
-                "download", fail_fast, pbar, file_path, succeeded
-            ),
-        )
+            await file_broker.download_files(
+                cloud_bucket,
+                destination_dir,
+                keys_to_download,
+                prefix,
+                lambda bucket_name, cloud_key, file_path, succeeded: __update_pbar_with_filenames(
+                    "download", fail_fast, pbar, file_path, succeeded
+                ),
+            )
 
-        pbar.close()
-    else:
-        print("No matching files found in the specified cloud bucket.")
+            pbar.close()
+        else:
+            print("No matching files found in the specified cloud bucket.")
 
 
 @execute_cli.command()
@@ -226,32 +243,33 @@ def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards, prefix):
     help="Only pull files with matching prefix",
     default="",
 )
-def delete(cloud_bucket, cloud_key_wildcard, prefix):
+@run_async
+async def delete(cloud_bucket, cloud_key_wildcard, prefix):
     """Delete files from the cloud bucket."""
-    bucket_contents = file_broker.get_bucket_keys(cloud_bucket)
+    async with FileBroker() as file_broker:
+        bucket_contents = await file_broker.get_bucket_keys(cloud_bucket)
 
-    keys_to_delete = []
-    for wildcard in cloud_key_wildcard:
-        wildcard = wildcard.strip()
-        keys_to_delete += fnmatch.filter(bucket_contents, wildcard)
+        keys_to_delete = []
+        for wildcard in cloud_key_wildcard:
+            wildcard = wildcard.strip()
+            keys_to_delete += fnmatch.filter(bucket_contents, wildcard)
 
-    if len(keys_to_delete) > 0:
-        pbar = tqdm(
-            total=len(keys_to_delete),
-            desc="Deleting",
-            unit="files",
-            colour=PROGRESS_BAR_COLOR,
-        )
-        file_broker.remove_items(
-            cloud_bucket,
-            keys_to_delete,
-            lambda bucket_name, cloud_key, file_path: __update_pbar_remove(
-                pbar, file_path
-            ),
-        )
-        pbar.close()
-    else:
-        print("No matching files found in the specified cloud bucket.")
+        if len(keys_to_delete) > 0:
+            pbar = tqdm(
+                total=len(keys_to_delete),
+                desc="Deleting",
+                unit="files",
+                colour=PROGRESS_BAR_COLOR,
+            )
+            await file_broker.remove_items(
+                cloud_bucket,
+                keys_to_delete,
+                prefix,
+                lambda bucket_name, file_path: __update_pbar_remove(pbar, file_path),
+            )
+            pbar.close()
+        else:
+            print("No matching files found in the specified cloud bucket.")
 
 
 def main():

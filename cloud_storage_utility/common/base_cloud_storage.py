@@ -112,6 +112,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         self,
         bucket_name: str,
         cloud_key: str,
+        prefix: str,
         callback: Callable[[str, str, str], None] = None,
     ) -> None:
         """An implementation for this must provide a way to send removal requests.
@@ -130,6 +131,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         self,
         bucket_name: str,
         item_names: List[str],
+        prefix: str,
         callback: Callable[[str, str, str], None] = None,
     ) -> List[Coroutine[Any, Any, None]]:
         """Get a list of all the coroutines needed to perform the requested removal.
@@ -151,7 +153,10 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         for item in item_names:
             remove_tasks.append(
                 self.remove_item(
-                    bucket_name=bucket_name, cloud_key=item, callback=callback
+                    bucket_name=bucket_name,
+                    cloud_key=item,
+                    prefix=prefix,
+                    callback=callback,
                 )
             )
         return remove_tasks

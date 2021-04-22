@@ -1,10 +1,16 @@
 import asyncio
+from aioresponses import aioresponses
 from unittest.mock import patch
+
+import pytest
 
 from cloud_storage_utility.config.config import DEFAULT_PLATFORM, SupportedPlatforms
 from cloud_storage_utility.file_broker import FileBroker
 from cloud_storage_utility.platforms.azure_cloud_storage import AzureCloudStorage
 from cloud_storage_utility.platforms.ibm_cloud_storage import IbmCloudStorage
+
+# All test coroutines will be treated as marked.
+pytestmark = pytest.mark.asyncio
 
 
 async def tmp_task():
@@ -25,63 +31,56 @@ class TestFileBroker:
         spy_loop.close.assert_called()
 
     @patch.object(AzureCloudStorage, "_AzureCloudStorage__create_service_client")
-    def test_broker_uses_correct_platform_when_specified(self, mock_azure):
-        file_broker = FileBroker(platform=SupportedPlatforms.AZURE)
+    async def test_broker_uses_correct_platform_when_specified(self, mock_azure):
+        async with FileBroker(platform=SupportedPlatforms.AZURE) as file_broker:
+            assert file_broker.platform == SupportedPlatforms.AZURE
+            assert isinstance(file_broker.service, AzureCloudStorage)
 
-        assert file_broker.platform == SupportedPlatforms.AZURE
-        assert isinstance(file_broker.service, AzureCloudStorage)
+    async def test_broker_uses_default_platform_when_not_specified(self):
+        async with FileBroker() as file_broker:
+            assert file_broker.platform == DEFAULT_PLATFORM
+            assert isinstance(file_broker.service, IbmCloudStorage)
 
-    def test_broker_uses_default_platform_when_not_specified(self):
-        file_broker = FileBroker()
+    async def test_upload_files_calls_service(self, mocker):
+        async with FileBroker() as file_broker:
+            file_broker.service.get_upload_files_coroutines = mocker.Mock(
+                return_value=[tmp_task()]
+            )
 
-        assert file_broker.platform == DEFAULT_PLATFORM
-        assert isinstance(file_broker.service, IbmCloudStorage)
+            args = ("test", ["test"], "", None)
+            await file_broker.upload_files(*args)
 
-    def test_upload_files_calls_service(self, event_loop, mocker):
-        file_broker = FileBroker()
-        file_broker.service.get_upload_files_coroutines = mocker.Mock(
-            return_value=[tmp_task()]
-        )
-        spy_loop = self.get_loop_spy(mocker, event_loop)
+            file_broker.service.get_upload_files_coroutines.assert_called_with(*args)
 
-        args = ("test", ["test"], None)
-        file_broker.upload_files(*args)
+    async def test_download_files_calls_service(self, event_loop, mocker):
+        async with FileBroker() as file_broker:
+            file_broker.service.get_download_files_coroutines = mocker.Mock(
+                return_value=[tmp_task()]
+            )
 
-        file_broker.service.get_upload_files_coroutines.assert_called_with(*args)
-        self.assert_loop_invoked(spy_loop)
+            args = ("test", "test", ["test"], "", None)
+            await file_broker.download_files(*args)
 
-    def test_download_files_calls_service(self, event_loop, mocker):
-        file_broker = FileBroker()
-        file_broker.service.get_download_files_coroutines = mocker.Mock(
-            return_value=[tmp_task()]
-        )
-        spy_loop = self.get_loop_spy(mocker, event_loop)
+            file_broker.service.get_download_files_coroutines.assert_called_with(*args)
 
-        args = ("test", "test", ["test"], None)
-        file_broker.download_files(*args)
+    async def test_get_bucket_keys_calls_service(self, mocker):
+        async with FileBroker() as file_broker:
+            result = asyncio.Future()
+            result.set_result({"test.txt": {"bytes": 0, "last_modified": ""}})
+            file_broker.service.get_bucket_keys = mocker.Mock(return_value=result)
 
-        file_broker.service.get_download_files_coroutines.assert_called_with(*args)
-        self.assert_loop_invoked(spy_loop)
+            args = "test"
+            bucket_key_list = await file_broker.get_bucket_keys(args)
 
-    def test_get_bucket_keys_calls_service(self, mocker):
-        file_broker = FileBroker()
-        file_broker.service.get_bucket_keys = mocker.Mock(return_value=["test_key"])
+            assert bucket_key_list == await result
 
-        args = "test"
-        bucket_key_list = file_broker.get_bucket_keys(args)
+    async def test_remove_items_calls_service(self, event_loop, mocker):
+        async with FileBroker() as file_broker:
+            file_broker.service.get_remove_items_coroutines = mocker.Mock(
+                return_value=[tmp_task()]
+            )
 
-        file_broker.service.get_bucket_keys.assert_called_with(args)
-        assert len(bucket_key_list) > 0
+            args = ("test", ["test"], "", None)
+            await file_broker.remove_items(*args)
 
-    def test_remove_items_calls_service(self, event_loop, mocker):
-        file_broker = FileBroker()
-        file_broker.service.get_remove_items_coroutines = mocker.Mock(
-            return_value=[tmp_task()]
-        )
-        spy_loop = self.get_loop_spy(mocker, event_loop)
-
-        args = ("test", ["test"], None)
-        file_broker.remove_items(*args)
-
-        file_broker.service.get_remove_items_coroutines.assert_called_with(*args)
-        self.assert_loop_invoked(spy_loop)
+            file_broker.service.get_remove_items_coroutines.assert_called_with(*args)

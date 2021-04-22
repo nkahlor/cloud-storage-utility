@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import sys
 from itertools import groupby
 from typing import Callable, List
 
@@ -19,24 +20,34 @@ class FileBroker:
 
     def __init__(self, platform: str = config.DEFAULT_PLATFORM):
         self.platform = platform
-        loop = asyncio.get_event_loop()
-        self.session = loop.run_until_complete(self.__create_aiohttp_session())
-        if platform == config.SupportedPlatforms.IBM:
+        self.session = None
+        self.service = None
+
+    async def __aenter__(self):
+        self.session = await self.__create_aiohttp_session()
+
+        if self.platform == config.SupportedPlatforms.IBM:
             self.service = IbmCloudStorage(self.session)
-        elif platform == config.SupportedPlatforms.AZURE:
+        elif self.platform == config.SupportedPlatforms.AZURE:
             self.service = AzureCloudStorage()
         else:
             raise Exception("Cloud platform not supported")
 
-    def __del__(self):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.session.close())
-        loop.close()
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.session.close()
 
     async def __create_aiohttp_session(self):
         return aiohttp.ClientSession()
 
-    def get_bucket_keys(
+    async def open(self):
+        return await self.__aenter__()
+
+    async def close(self):
+        await self.__aexit__(*sys.exc_info())
+
+    async def get_bucket_keys(
         self, bucket_name: str, prefix: str = None, delimiter: str = None
     ) -> List[str]:
         """Get the names of all the keys in the bucket.
@@ -47,12 +58,9 @@ class FileBroker:
         Returns:
             List of keys from the targeted bucket
         """
-        loop = asyncio.get_event_loop()
-        return loop.run_until_complete(
-            self.service.get_bucket_keys(bucket_name, prefix, delimiter)
-        )
+        return await self.service.get_bucket_keys(bucket_name, prefix, delimiter)
 
-    def upload_files(
+    async def upload_files(
         self,
         bucket_name: str,
         cloud_map_list: List[CloudLocalMap],
@@ -71,14 +79,12 @@ class FileBroker:
                 Takes the parameters: bucket_name, cloud_key, file_path, removal_succeeded.
                 Defaults to None.
         """
-        loop = asyncio.get_event_loop()
-
         upload_tasks = self.service.get_upload_files_coroutines(
             bucket_name, cloud_map_list, prefix, callback
         )
-        loop.run_until_complete(asyncio.gather(*upload_tasks))
+        await asyncio.gather(*upload_tasks)
 
-    def download_files(
+    async def download_files(
         self,
         bucket_name: str,
         local_directory: str,
@@ -100,13 +106,12 @@ class FileBroker:
                 Takes the parameters: bucket_name, cloud_key, file_path, download_succeeded.
                 Defaults to None.
         """
-        loop = asyncio.get_event_loop()
         download_tasks = self.service.get_download_files_coroutines(
             bucket_name, local_directory, file_names, prefix, callback
         )
-        loop.run_until_complete(asyncio.gather(*download_tasks))
+        await asyncio.gather(*download_tasks)
 
-    def remove_items(
+    async def remove_items(
         self,
         bucket_name: str,
         cloud_keys: List[str],
@@ -126,13 +131,12 @@ class FileBroker:
                 Defaults to None.
         """
 
-        loop = asyncio.get_event_loop()
         remove_tasks = self.service.get_remove_items_coroutines(
-            bucket_name, cloud_keys, callback
+            bucket_name, cloud_keys, prefix, callback
         )
-        loop.run_until_complete(asyncio.gather(*remove_tasks))
+        await asyncio.gather(*remove_tasks)
 
-    def sync_local_files(
+    async def sync_local_files(
         self,
         file_paths: List[str],
         bucket_name: str,
@@ -165,7 +169,7 @@ class FileBroker:
             cloud_keys = list(
                 map(lambda file_path: os.path.basename(file_path), group_as_list)
             )
-            self.download_files(
+            await self.download_files(
                 bucket_name=bucket_name,
                 local_directory=key,
                 file_names=cloud_keys,
