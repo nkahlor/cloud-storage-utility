@@ -1,5 +1,4 @@
 import asyncio
-from aioresponses import aioresponses
 from unittest.mock import patch
 
 import pytest

@@ -38,6 +38,7 @@ setuptools.setup(
         "azure-identity",
         "tqdm",
         "colorama",
+        "setuptools_scm",
     ],
     python_requires=">=3.6",
 )

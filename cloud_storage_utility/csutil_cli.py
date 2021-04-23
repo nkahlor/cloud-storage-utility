@@ -26,8 +26,8 @@ DESIRED_PLATFORM = os.getenv("CSUTIL_DEFAULT_PLATFORM")
 
 init()
 logging.basicConfig(filename="csutil-error.log", level=logging.WARNING)
+__version__ = "0.0.0"
 
-__version__ = get_version(root="..", relative_to=__file__)
 
 _global_test_options = [
     click.option(
@@ -274,4 +274,9 @@ async def delete(cloud_bucket, cloud_key_wildcard, prefix):
 
 def main():
     """Entry point."""
+    __version__ = get_version(root="..", relative_to=__file__)
     execute_cli()
+
+
+if __name__ == "__main__":
+    main()

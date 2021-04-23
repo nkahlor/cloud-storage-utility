@@ -1,8 +1,8 @@
-from cloud_storage_utility.config import config
 import aiohttp
 import pytest
 from aioresponses import aioresponses
 
+from cloud_storage_utility.config import config
 from cloud_storage_utility.platforms.ibm_cloud_storage import IbmCloudStorage
 
 

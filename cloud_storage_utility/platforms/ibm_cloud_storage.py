@@ -1,8 +1,9 @@
+import base64
+import hashlib
 import logging
 import time
+
 import xmltodict
-import hashlib
-import base64
 
 from ..common.base_cloud_storage import BaseCloudStorage
 from ..config import config

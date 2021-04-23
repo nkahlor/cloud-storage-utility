@@ -1,9 +1,9 @@
 import abc
-from cloud_storage_utility.common.util import strip_prefix
 import os
 from typing import Any, Callable, Coroutine, List
 
 from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
+from cloud_storage_utility.common.util import strip_prefix
 
 # 5 MB chunks
 DEFAULT_PART_SIZE = 1024 * 1024 * 5
