@@ -27,7 +27,7 @@ pip install cloud-storage-utility
 To configure this application, you have to set a few environment variables.
 
 ```
-# You can use 'azure' or 'ibm'
+# Currently we only support 'ibm'
 CSUTIL_CLOUD_PLATFORM=
 
 # You only need to set these if you intend to use ibm
@@ -48,6 +48,7 @@ CSUTIL_AZURE_CONNECTION_STRING=
 ```
 
 By default, the CLI will attempt to use IBM
+
 Note: for IBM, if `CSUTIL_IBM_API_KEY` is undefined, we will attempt to use `IBMCLOUD_API_KEY` instead.
 
 #### CLI Commands
