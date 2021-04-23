@@ -1,9 +1,8 @@
 import asyncio
-from unittest.mock import patch
 
 import pytest
 
-from cloud_storage_utility.config.config import DEFAULT_PLATFORM, SupportedPlatforms
+from cloud_storage_utility.config.config import DEFAULT_PLATFORM
 from cloud_storage_utility.file_broker import FileBroker
 from cloud_storage_utility.platforms.ibm_cloud_storage import IbmCloudStorage
 
