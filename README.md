@@ -7,8 +7,12 @@
 
 A Python based cloud utility to help you transfer files to and from multiple cloud providers under one CLI/API.
 
-
-Note: Support for Azure is experimental, first priority is IBM!
+## Supported Cloud Platforms
+| Platform  | Implemented |
+| :-------: | :---------- |
+| IBM Cloud | ✅           |
+|   Azure   | ❌           |
+|    AWS    | ❌           |
 
 ## Installation
 
