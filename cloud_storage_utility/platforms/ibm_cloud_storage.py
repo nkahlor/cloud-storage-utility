@@ -34,10 +34,10 @@ class IbmCloudStorage(BaseCloudStorage):
             }
 
             params: Dict[str, str] = {}
-            if prefix:
+            if prefix and prefix != "":
                 params = {"prefix": prefix.strip(), **params}
-            if delimiter:
-                params = {"delimiter": delimiter, **params}
+                if delimiter:
+                    params = {"delimiter": delimiter, **params}
 
             all_items = {}
             is_truncated = True

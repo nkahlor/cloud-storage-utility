@@ -22,7 +22,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/csutil",
-            "args": ["list-remote", "-p", "20200120/", "kronos-testdata-nicky"],
+            "args": ["list-remote", "-p", "20200220/", "kronos-testdata-nicky"],
             "console": "integratedTerminal"
         },
         {
@@ -30,7 +30,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/csutil",
-            "args": ["delete", "kronos-testdata-nicky", "* "],
+            "args": ["delete",  "kronos-testdata-nicky", "* "],
             "console": "integratedTerminal"
         }
     ]
