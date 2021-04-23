@@ -12,7 +12,6 @@ from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
 from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
 
 from .config import config
-from .platforms.azure_cloud_storage import AzureCloudStorage
 from .platforms.ibm_cloud_storage import IbmCloudStorage
 
 
@@ -55,8 +54,6 @@ class FileBroker:
 
         if self.platform == config.SupportedPlatforms.IBM:
             self.service = IbmCloudStorage(self.session)
-        elif self.platform == config.SupportedPlatforms.AZURE:
-            self.service = AzureCloudStorage()
         else:
             raise Exception("Cloud platform not supported")
 

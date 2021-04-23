@@ -5,7 +5,6 @@ import pytest
 
 from cloud_storage_utility.config.config import DEFAULT_PLATFORM, SupportedPlatforms
 from cloud_storage_utility.file_broker import FileBroker
-from cloud_storage_utility.platforms.azure_cloud_storage import AzureCloudStorage
 from cloud_storage_utility.platforms.ibm_cloud_storage import IbmCloudStorage
 
 # All test coroutines will be treated as marked.
@@ -28,12 +27,6 @@ class TestFileBroker:
     def assert_loop_invoked(spy_loop):
         spy_loop.run_until_complete.assert_called()
         spy_loop.close.assert_called()
-
-    @patch.object(AzureCloudStorage, "_AzureCloudStorage__create_service_client")
-    async def test_broker_uses_correct_platform_when_specified(self, mock_azure):
-        async with FileBroker(platform=SupportedPlatforms.AZURE) as file_broker:
-            assert file_broker.platform == SupportedPlatforms.AZURE
-            assert isinstance(file_broker.service, AzureCloudStorage)
 
     async def test_broker_uses_default_platform_when_not_specified(self):
         async with FileBroker() as file_broker:

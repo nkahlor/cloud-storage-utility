@@ -8,11 +8,11 @@
 A Python based cloud utility to help you transfer files to and from multiple cloud providers under one CLI/API.
 
 ## Supported Cloud Platforms
-| Platform  | Implemented |
-| :-------: | :---------- |
-| IBM Cloud | ✅           |
-|   Azure   | ❌           |
-|    AWS    | ❌           |
+| Platform  | Implemented    |
+| :-------: | :------------- |
+| IBM Cloud | ✅              |
+|   Azure   | ❌ Coming Soon! |
+|    AWS    | ❌ Coming Soon! |
 
 ## Installation
 
