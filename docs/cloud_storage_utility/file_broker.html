@@ -80,10 +80,11 @@
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Routes cloud storage operations to underlying platform implementations.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">from</span> <span class="nn">cloud_storage_utility.types.bucket_key</span> <span class="kn">import</span> <span class="n">BucketKeyMetadata</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">aiohttp</span>
 
@@ -110,7 +111,7 @@
 
 <span class="sd">    Alternatively, you can manually call  `open` and `close` to manage the http connections.</span>
 
-<span class="sd">    ```python</span>
+<span class="sd">    ```</span>
 <span class="sd">    file_broker = FileBroker()</span>
 <span class="sd">    file_broker.open()</span>
 
@@ -147,18 +148,22 @@
         <span class="k">return</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Open an aiohttp session &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aenter__</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Close the aiohttp session &quot;&quot;&quot;</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aexit__</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Get the names of all the keys in the bucket.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            bucket_name(str): The target bucket</span>
+<span class="sd">            prefix(str, optional): Only return keys matching this prefix</span>
+<span class="sd">            delimiter(str, optional): Delimiter between prefix and key-name</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List of keys from the targeted bucket</span>
@@ -169,7 +174,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">cloud_map_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CloudLocalMap</span><span class="p">],</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Upload a list of files from a local directory, and map them to they respective cloud keys in a particular bucket.</span>
@@ -179,6 +184,8 @@
 <span class="sd">                The target bucket.</span>
 <span class="sd">            cloud_map_list (CloudLocalMap[]):</span>
 <span class="sd">                List of local files to upload, and what to name them in the cloud.</span>
+<span class="sd">            prefix (str, optional):</span>
+<span class="sd">                Prefix to prepend in the cloud.</span>
 <span class="sd">            callback (function, optional):</span>
 <span class="sd">                Optional callback to execute after every file upload completes.</span>
 <span class="sd">                Takes the parameters: bucket_name, cloud_key, file_path, removal_succeeded.</span>
@@ -194,7 +201,7 @@
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">local_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">file_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Download all of the requested files from the bucket, and place them in the specified directory.</span>
@@ -206,6 +213,8 @@
 <span class="sd">                The destination folder. Must already exist.</span>
 <span class="sd">            file_names (str[]):</span>
 <span class="sd">                A list of the files we want to download.</span>
+<span class="sd">            prefix (str, optional):</span>
+<span class="sd">                Only download files with the matching prefix.</span>
 <span class="sd">            callback (function, optional):</span>
 <span class="sd">                Optional callback to execute after every file download completes.</span>
 <span class="sd">                Takes the parameters: bucket_name, cloud_key, file_path, download_succeeded.</span>
@@ -244,7 +253,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">file_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;If any of the files in file_paths are missing locally, go get them from the cloud bucket.</span>
 
@@ -255,6 +264,8 @@
 <span class="sd">                List of local file paths you want to synchronize.</span>
 <span class="sd">            bucket_name (str):</span>
 <span class="sd">                Target bucket.</span>
+<span class="sd">            prefix(str, optional):</span>
+<span class="sd">                Only sync files with the matching prefix.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Exclude all files that exist locally</span>
@@ -277,6 +288,7 @@
                 <span class="n">bucket_name</span><span class="o">=</span><span class="n">bucket_name</span><span class="p">,</span>
                 <span class="n">local_directory</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
                 <span class="n">file_names</span><span class="o">=</span><span class="n">cloud_keys</span><span class="p">,</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
                 <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
 </pre></div>
@@ -311,7 +323,7 @@
 
 <span class="sd">    Alternatively, you can manually call  `open` and `close` to manage the http connections.</span>
 
-<span class="sd">    ```python</span>
+<span class="sd">    ```</span>
 <span class="sd">    file_broker = FileBroker()</span>
 <span class="sd">    file_broker.open()</span>
 
@@ -348,18 +360,22 @@
         <span class="k">return</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Open an aiohttp session &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aenter__</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Close the aiohttp session &quot;&quot;&quot;</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aexit__</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Get the names of all the keys in the bucket.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            bucket_name(str): The target bucket</span>
+<span class="sd">            prefix(str, optional): Only return keys matching this prefix</span>
+<span class="sd">            delimiter(str, optional): Delimiter between prefix and key-name</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List of keys from the targeted bucket</span>
@@ -370,7 +386,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">cloud_map_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CloudLocalMap</span><span class="p">],</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Upload a list of files from a local directory, and map them to they respective cloud keys in a particular bucket.</span>
@@ -380,6 +396,8 @@
 <span class="sd">                The target bucket.</span>
 <span class="sd">            cloud_map_list (CloudLocalMap[]):</span>
 <span class="sd">                List of local files to upload, and what to name them in the cloud.</span>
+<span class="sd">            prefix (str, optional):</span>
+<span class="sd">                Prefix to prepend in the cloud.</span>
 <span class="sd">            callback (function, optional):</span>
 <span class="sd">                Optional callback to execute after every file upload completes.</span>
 <span class="sd">                Takes the parameters: bucket_name, cloud_key, file_path, removal_succeeded.</span>
@@ -395,7 +413,7 @@
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">local_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">file_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Download all of the requested files from the bucket, and place them in the specified directory.</span>
@@ -407,6 +425,8 @@
 <span class="sd">                The destination folder. Must already exist.</span>
 <span class="sd">            file_names (str[]):</span>
 <span class="sd">                A list of the files we want to download.</span>
+<span class="sd">            prefix (str, optional):</span>
+<span class="sd">                Only download files with the matching prefix.</span>
 <span class="sd">            callback (function, optional):</span>
 <span class="sd">                Optional callback to execute after every file download completes.</span>
 <span class="sd">                Takes the parameters: bucket_name, cloud_key, file_path, download_succeeded.</span>
@@ -445,7 +465,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">file_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;If any of the files in file_paths are missing locally, go get them from the cloud bucket.</span>
 
@@ -456,6 +476,8 @@
 <span class="sd">                List of local file paths you want to synchronize.</span>
 <span class="sd">            bucket_name (str):</span>
 <span class="sd">                Target bucket.</span>
+<span class="sd">            prefix(str, optional):</span>
+<span class="sd">                Only sync files with the matching prefix.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Exclude all files that exist locally</span>
@@ -478,6 +500,7 @@
                 <span class="n">bucket_name</span><span class="o">=</span><span class="n">bucket_name</span><span class="p">,</span>
                 <span class="n">local_directory</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
                 <span class="n">file_names</span><span class="o">=</span><span class="n">cloud_keys</span><span class="p">,</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
                 <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
 </pre></div>
@@ -498,13 +521,13 @@
 
 <p>Alternatively, you can manually call  <code><a href="#FileBroker.open">open</a></code> and <code><a href="#FileBroker.close">close</a></code> to manage the http connections.</p>
 
-<div class="codehilite"><pre><span></span><code><span class="n">file_broker</span> <span class="o">=</span> <span class="n">FileBroker</span><span class="p">()</span>
-<span class="n">file_broker</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+<pre><code>file_broker = FileBroker()
+file_broker.open()
 
-<span class="n">file_broker</span><span class="o">.</span><span class="n">upload_files</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+file_broker.upload_files(...)
 
-<span class="n">file_broker</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</code></pre></div>
+file_broker.close()
+</code></pre>
 
 <p>Generally, you only really want 1 file broker per application. You don't really need to open a ton of http sessions
 if you're connecting to the same host each time.</p>
@@ -542,12 +565,15 @@ if you're connecting to the same host each time.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Open an aiohttp session &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aenter__</span><span class="p">()</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Open an aiohttp session</p>
+</div>
+
 
                             </div>
                             <div id="FileBroker.close" class="classattr">
@@ -561,12 +587,15 @@ if you're connecting to the same host each time.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Close the aiohttp session &quot;&quot;&quot;</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aexit__</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Close the aiohttp session</p>
+</div>
+
 
                             </div>
                             <div id="FileBroker.get_bucket_keys" class="classattr">
@@ -577,20 +606,22 @@ if you're connecting to the same host each time.</p>
             <span class="name">get_bucket_keys</span><span class="signature">(
     self,
     bucket_name: str,
-    prefix: str = None,
-    delimiter: str = None
-) -&gt; List[str]</span>:
+    prefix: str = &#39;&#39;,
+    delimiter: str = &#39;/&#39;
+) -&gt; Dict[str, <a href="types/bucket_key.html#BucketKeyMetadata">cloud_storage_utility.types.bucket_key.BucketKeyMetadata</a>]</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Get the names of all the keys in the bucket.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            bucket_name(str): The target bucket</span>
+<span class="sd">            prefix(str, optional): Only return keys matching this prefix</span>
+<span class="sd">            delimiter(str, optional): Delimiter between prefix and key-name</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List of keys from the targeted bucket</span>
@@ -606,6 +637,8 @@ if you're connecting to the same host each time.</p>
 
 <ul>
 <li><strong>bucket_name(str):</strong>  The target bucket</li>
+<li><strong>prefix(str, optional):</strong>  Only return keys matching this prefix</li>
+<li><strong>delimiter(str, optional):</strong>  Delimiter between prefix and key-name</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
@@ -626,7 +659,7 @@ if you're connecting to the same host each time.</p>
     self,
     bucket_name: str,
     cloud_map_list: List[<a href="common/cloud_local_map.html#CloudLocalMap">cloud_storage_utility.common.cloud_local_map.CloudLocalMap</a>],
-    prefix: str = None,
+    prefix: str = &#39;&#39;,
     callback: Callable[[str, str, str, bool], NoneType] = None
 ) -&gt; None</span>:
     </div>
@@ -637,7 +670,7 @@ if you're connecting to the same host each time.</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">cloud_map_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CloudLocalMap</span><span class="p">],</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Upload a list of files from a local directory, and map them to they respective cloud keys in a particular bucket.</span>
@@ -647,6 +680,8 @@ if you're connecting to the same host each time.</p>
 <span class="sd">                The target bucket.</span>
 <span class="sd">            cloud_map_list (CloudLocalMap[]):</span>
 <span class="sd">                List of local files to upload, and what to name them in the cloud.</span>
+<span class="sd">            prefix (str, optional):</span>
+<span class="sd">                Prefix to prepend in the cloud.</span>
 <span class="sd">            callback (function, optional):</span>
 <span class="sd">                Optional callback to execute after every file upload completes.</span>
 <span class="sd">                Takes the parameters: bucket_name, cloud_key, file_path, removal_succeeded.</span>
@@ -667,6 +702,7 @@ if you're connecting to the same host each time.</p>
 <ul>
 <li><strong>bucket_name (str):</strong>  The target bucket.</li>
 <li><strong>cloud_map_list (CloudLocalMap[]):</strong>  List of local files to upload, and what to name them in the cloud.</li>
+<li><strong>prefix (str, optional):</strong>  Prefix to prepend in the cloud.</li>
 <li><strong>callback (function, optional):</strong>  Optional callback to execute after every file upload completes.
 Takes the parameters: bucket_name, cloud_key, file_path, removal_succeeded.
 Defaults to None.</li>
@@ -685,7 +721,7 @@ Defaults to None.</li>
     bucket_name: str,
     local_directory: str,
     file_names: List[str],
-    prefix: str = None,
+    prefix: str = &#39;&#39;,
     callback: Callable[[str, str, str, bool], NoneType] = None
 ) -&gt; None</span>:
     </div>
@@ -697,7 +733,7 @@ Defaults to None.</li>
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">local_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">file_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Download all of the requested files from the bucket, and place them in the specified directory.</span>
@@ -709,6 +745,8 @@ Defaults to None.</li>
 <span class="sd">                The destination folder. Must already exist.</span>
 <span class="sd">            file_names (str[]):</span>
 <span class="sd">                A list of the files we want to download.</span>
+<span class="sd">            prefix (str, optional):</span>
+<span class="sd">                Only download files with the matching prefix.</span>
 <span class="sd">            callback (function, optional):</span>
 <span class="sd">                Optional callback to execute after every file download completes.</span>
 <span class="sd">                Takes the parameters: bucket_name, cloud_key, file_path, download_succeeded.</span>
@@ -730,6 +768,7 @@ Defaults to None.</li>
 <li><strong>bucket_name (str):</strong>  Target bucket.</li>
 <li><strong>local_directory (str):</strong>  The destination folder. Must already exist.</li>
 <li><strong>file_names (str[]):</strong>  A list of the files we want to download.</li>
+<li><strong>prefix (str, optional):</strong>  Only download files with the matching prefix.</li>
 <li><strong>callback (function, optional):</strong>  Optional callback to execute after every file download completes.
 Takes the parameters: bucket_name, cloud_key, file_path, download_succeeded.
 Defaults to None.</li>
@@ -804,7 +843,7 @@ Defaults to None.</li>
     self,
     file_paths: List[str],
     bucket_name: str,
-    prefix: str = None
+    prefix: str = &#39;&#39;
 ) -&gt; None</span>:
     </div>
 
@@ -814,7 +853,7 @@ Defaults to None.</li>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">file_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;If any of the files in file_paths are missing locally, go get them from the cloud bucket.</span>
 
@@ -825,6 +864,8 @@ Defaults to None.</li>
 <span class="sd">                List of local file paths you want to synchronize.</span>
 <span class="sd">            bucket_name (str):</span>
 <span class="sd">                Target bucket.</span>
+<span class="sd">            prefix(str, optional):</span>
+<span class="sd">                Only sync files with the matching prefix.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Exclude all files that exist locally</span>
@@ -847,6 +888,7 @@ Defaults to None.</li>
                 <span class="n">bucket_name</span><span class="o">=</span><span class="n">bucket_name</span><span class="p">,</span>
                 <span class="n">local_directory</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
                 <span class="n">file_names</span><span class="o">=</span><span class="n">cloud_keys</span><span class="p">,</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
                 <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
 </pre></div>
@@ -862,6 +904,7 @@ Defaults to None.</li>
 <ul>
 <li><strong>file_path (str[]):</strong>  List of local file paths you want to synchronize.</li>
 <li><strong>bucket_name (str):</strong>  Target bucket.</li>
+<li><strong>prefix(str, optional):</strong>  Only sync files with the matching prefix.</li>
 </ul>
 </div>
 

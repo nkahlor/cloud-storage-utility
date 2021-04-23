@@ -26,7 +26,10 @@ DESIRED_PLATFORM = os.getenv("CSUTIL_DEFAULT_PLATFORM")
 
 init()
 logging.basicConfig(filename="csutil-error.log", level=logging.WARNING)
-__version__ = "0.0.0"
+try:
+    __version__ = get_version(root="..", relative_to=__file__)
+except Exception as error:
+    __version__ = "0.0.0"
 
 
 _global_test_options = [
@@ -125,7 +128,10 @@ async def list_remote(bucket_name, prefix, delimiter):
     """List contents of cloud bucket."""
     async with FileBroker() as file_broker:
         keys = await file_broker.get_bucket_keys(bucket_name, prefix, delimiter)
-        print(*keys, sep="\n")
+        if len(keys) == 0:
+            print(f"No Keys found matching the prefix {prefix} in {bucket_name}")
+        else:
+            print(*keys, sep="\n")
 
 
 @execute_cli.command()
@@ -237,7 +243,7 @@ async def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards, pr
 @click.argument("cloud-bucket", type=click.STRING)
 @click.argument("cloud-key-wildcard", type=click.STRING, nargs=UNLIMITED_ARGS)
 @run_async
-async def delete(cloud_bucket, cloud_key_wildcard):
+async def delete(cloud_bucket, cloud_key_wildcard, prefix):
     """Delete files from the cloud bucket."""
     async with FileBroker() as file_broker:
         bucket_contents = await file_broker.get_bucket_keys(cloud_bucket)
@@ -266,7 +272,6 @@ async def delete(cloud_bucket, cloud_key_wildcard):
 
 def main():
     """Entry point."""
-    __version__ = get_version(root="..", relative_to=__file__)
     execute_cli()
 
 

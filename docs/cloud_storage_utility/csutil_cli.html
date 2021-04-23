@@ -81,7 +81,10 @@
 
 <span class="n">init</span><span class="p">()</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;csutil-error.log&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.0.0&quot;</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">__version__</span> <span class="o">=</span> <span class="n">get_version</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="n">relative_to</span><span class="o">=</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+    <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.0.0&quot;</span>
 
 
 <span class="n">_global_test_options</span> <span class="o">=</span> <span class="p">[</span>
@@ -180,7 +183,10 @@
     <span class="sd">&quot;&quot;&quot;List contents of cloud bucket.&quot;&quot;&quot;</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">()</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="k">await</span> <span class="n">file_broker</span><span class="o">.</span><span class="n">get_bucket_keys</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">keys</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No Keys found matching the prefix </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">keys</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
 <span class="nd">@execute_cli</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
@@ -292,7 +298,7 @@
 <span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;cloud-bucket&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;cloud-key-wildcard&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">UNLIMITED_ARGS</span><span class="p">)</span>
 <span class="nd">@run_async</span>
-<span class="k">async</span> <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">cloud_bucket</span><span class="p">,</span> <span class="n">cloud_key_wildcard</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">cloud_bucket</span><span class="p">,</span> <span class="n">cloud_key_wildcard</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Delete files from the cloud bucket.&quot;&quot;&quot;</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">()</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
         <span class="n">bucket_contents</span> <span class="o">=</span> <span class="k">await</span> <span class="n">file_broker</span><span class="o">.</span><span class="n">get_bucket_keys</span><span class="p">(</span><span class="n">cloud_bucket</span><span class="p">)</span>
@@ -321,7 +327,6 @@
 
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Entry point.&quot;&quot;&quot;</span>
-    <span class="n">__version__</span> <span class="o">=</span> <span class="n">get_version</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="n">relative_to</span><span class="o">=</span><span class="vm">__file__</span><span class="p">)</span>
     <span class="n">execute_cli</span><span class="p">()</span>
 
 
@@ -373,7 +378,6 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Entry point.&quot;&quot;&quot;</span>
-    <span class="n">__version__</span> <span class="o">=</span> <span class="n">get_version</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="n">relative_to</span><span class="o">=</span><span class="vm">__file__</span><span class="p">)</span>
     <span class="n">execute_cli</span><span class="p">()</span>
 </pre></div>
 
