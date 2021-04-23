@@ -93,7 +93,7 @@ async def main():
         )
 
 if __name__ == "__main__":
-    asyncio.run(main)
+    asyncio.run(main())
 ```
 Check out the [API docs](https://nkahlor.github.io/cloud-storage-utility/cloud_storage_utility.html) for many more detailed examples!
 ## Developing Locally
