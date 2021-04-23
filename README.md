@@ -77,16 +77,19 @@ csutil push example-bucket/test_directory ./dat/tmp.txt ./dat/tmp2.txt
 Example usage
 
 ```python
+import asyncio
 from cloud_storage_utility.file_broker import FileBroker
 
+async def main():
+    async with FileBroker() as file_broker:
+        file_broker.download_files(
+            bucket_name="test-bucket",
+            local_directory="./data",
+            file_names=["tmp.txt1", "tmp2.txt"],
+        )
 
-broker = FileBroker()
-
-broker.download_files(
-    bucket_name="test-bucket",
-    local_directory="./data",
-    file_names=["tmp.txt1", "tmp2.txt"],
-)
+if __name__ == "__main__":
+    asyncio.run(main)
 ```
 
 ## Developing Locally
