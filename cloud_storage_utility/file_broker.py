@@ -1,7 +1,6 @@
 """Routes cloud storage operations to underlying platform implementations."""
 
 import asyncio
-from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
 import os
 import sys
 from itertools import groupby
@@ -10,6 +9,7 @@ from typing import Callable, Dict, List
 import aiohttp
 
 from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
+from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
 
 from .config import config
 from .platforms.azure_cloud_storage import AzureCloudStorage
@@ -89,7 +89,7 @@ class FileBroker:
         Returns:
             List of keys from the targeted bucket
         """
-        return await self.service.get_bucket_keys(bucket_name, prefix, delimiter)
+        return await self.service.get_bucket_keys(bucket_name, prefix, delimiter)  # type: ignore
 
     async def upload_files(
         self,
@@ -112,7 +112,7 @@ class FileBroker:
                 Takes the parameters: bucket_name, cloud_key, file_path, removal_succeeded.
                 Defaults to None.
         """
-        upload_tasks = self.service.get_upload_files_coroutines(
+        upload_tasks = self.service.get_upload_files_coroutines(  # type: ignore
             bucket_name, cloud_map_list, prefix, callback
         )
         await asyncio.gather(*upload_tasks)
@@ -141,7 +141,7 @@ class FileBroker:
                 Takes the parameters: bucket_name, cloud_key, file_path, download_succeeded.
                 Defaults to None.
         """
-        download_tasks = self.service.get_download_files_coroutines(
+        download_tasks = self.service.get_download_files_coroutines(  # type: ignore
             bucket_name, local_directory, file_names, prefix, callback
         )
         await asyncio.gather(*download_tasks)
@@ -165,7 +165,7 @@ class FileBroker:
                 Defaults to None.
         """
 
-        remove_tasks = self.service.get_remove_items_coroutines(
+        remove_tasks = self.service.get_remove_items_coroutines(  # type: ignore
             bucket_name, cloud_keys, callback
         )
         await asyncio.gather(*remove_tasks)

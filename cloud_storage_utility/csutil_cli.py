@@ -28,7 +28,7 @@ init()
 logging.basicConfig(filename="csutil-error.log", level=logging.WARNING)
 try:
     __version__ = get_version(root="..", relative_to=__file__)
-except Exception as error:
+except Exception:
     __version__ = "0.0.0"
 
 

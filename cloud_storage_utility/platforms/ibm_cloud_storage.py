@@ -1,11 +1,12 @@
 import base64
-from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
 import hashlib
 import logging
 import time
 from typing import Dict
 
 import xmltodict
+
+from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
 
 from ..common.base_cloud_storage import BaseCloudStorage
 from ..config import config
@@ -32,7 +33,7 @@ class IbmCloudStorage(BaseCloudStorage):
                 "Authorization": f"Bearer {access_token}",
             }
 
-            params = {}
+            params: Dict[str, str] = {}
             if prefix:
                 params = {"prefix": prefix.strip(), **params}
             if delimiter:
@@ -60,15 +61,19 @@ class IbmCloudStorage(BaseCloudStorage):
                             item = response_dict["Contents"]
                             items = {
                                 item["Key"]: {
-                                    "last_modified": item["LastModified"],
-                                    "bytes": item["Size"],
+                                    BucketKeyMetadata(
+                                        last_modified=item["LastModified"],
+                                        bytes=item["Size"],
+                                    )
                                 }
                             }
                         else:
                             items = {
                                 item["Key"]: {
-                                    "last_modified": item["LastModified"],
-                                    "bytes": item["Size"],
+                                    BucketKeyMetadata(
+                                        last_modified=item["LastModified"],
+                                        bytes=item["Size"],
+                                    )
                                 }
                                 for item in response_dict["Contents"]
                             }
@@ -83,7 +88,7 @@ class IbmCloudStorage(BaseCloudStorage):
             logging.exception(error)
             return {}
 
-        return all_items
+        return dict(all_items)
 
     async def upload_file(
         self,

@@ -1,10 +1,10 @@
 import abc
-from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
 import os
 from typing import Any, Callable, Coroutine, Dict, List
 
 from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
 from cloud_storage_utility.common.util import strip_prefix
+from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
 
 # 5 MB chunks
 DEFAULT_PART_SIZE = 1024 * 1024 * 5
@@ -38,7 +38,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         self.file_threshold = file_threshold
 
     @abc.abstractmethod
-    def get_bucket_keys(
+    async def get_bucket_keys(
         self, bucket_name: str, prefix: str = "", delimiter: str = "/"
     ) -> Dict[str, BucketKeyMetadata]:
         """An implementation of this must provide a way to list the contents of a bucket.
@@ -98,7 +98,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
             bool:
                 Whether the upload was successful or not.
         """
-        return
+        return False
 
     def get_upload_files_coroutines(
         self,
@@ -106,7 +106,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         cloud_map_list: List[CloudLocalMap],
         prefix: str = "",
         callback: Callable[[str, str, str, bool], None] = None,
-    ) -> List[Coroutine[Any, Any, None]]:
+    ) -> List[Coroutine[Any, Any, bool]]:
         """Collect all of the coroutines necessary to complete the requested uploads.
 
         Args:
@@ -139,7 +139,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         return upload_tasks
 
     @abc.abstractmethod
-    def remove_item(
+    async def remove_item(
         self,
         bucket_name: str,
         cloud_key: str,
@@ -159,7 +159,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
             bool:
                 Whether the remove was successful or not.
         """
-        return
+        return False
 
     def get_remove_items_coroutines(
         self,
@@ -220,7 +220,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
             bool:
                 Whether the download was successful or not.
         """
-        return
+        return False
 
     def get_download_files_coroutines(
         self,
@@ -229,7 +229,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         cloud_key_list: List[str],
         prefix: str = "",
         callback: Callable[[str, str, str, bool], None] = None,
-    ) -> List[Coroutine[Any, Any, None]]:
+    ) -> List[Coroutine[Any, Any, bool]]:
         """Get a list of all the coroutines needed to perform the requested download.
 
         Args:
