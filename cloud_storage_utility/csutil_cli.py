@@ -236,15 +236,8 @@ async def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards, pr
 @execute_cli.command()
 @click.argument("cloud-bucket", type=click.STRING)
 @click.argument("cloud-key-wildcard", type=click.STRING, nargs=UNLIMITED_ARGS)
-@click.option(
-    "-p",
-    "--prefix",
-    type=click.STRING,
-    help="Only pull files with matching prefix",
-    default="",
-)
 @run_async
-async def delete(cloud_bucket, cloud_key_wildcard, prefix):
+async def delete(cloud_bucket, cloud_key_wildcard):
     """Delete files from the cloud bucket."""
     async with FileBroker() as file_broker:
         bucket_contents = await file_broker.get_bucket_keys(cloud_bucket)
@@ -264,7 +257,6 @@ async def delete(cloud_bucket, cloud_key_wildcard, prefix):
             await file_broker.remove_items(
                 cloud_bucket,
                 keys_to_delete,
-                prefix,
                 lambda bucket_name, file_path: __update_pbar_remove(pbar, file_path),
             )
             pbar.close()

@@ -69,11 +69,12 @@
 
 <h4 id="ibm">IBM</h4>
 
-<pre><code>| Environment Variable      | Config Dictionary             |
-|-------------------------- |-----------------------------  |
-| CSUTIL_IBM_API_KEY        | IBM_CONFIG['api_key']         |
-| CSUTIL_IBM_AUTH_ENDPOINT  | IBM_CONFIG['auth_endpoint']   |
-| CSUTIL_IBM_COS_ENDPOINT   | IBM_CONFIG['cos_endpoint']    |
+<pre><code>| Environment Variable              | Config Dictionary           |
+|------------------------------     |-----------------------------|
+| IBMCLOUD_API_KEY (preferred)      | IBM_CONFIG['api_key']       |
+| CSUTIL_IBM_API_KEY                | IBM_CONFIG['api_key']       |
+| CSUTIL_IBM_AUTH_ENDPOINT          | IBM_CONFIG['auth_endpoint'] |
+| CSUTIL_IBM_COS_ENDPOINT           | IBM_CONFIG['cos_endpoint']  |
 </code></pre>
 
 <h4 id="azure">Azure</h4>
@@ -95,11 +96,13 @@
 
 <span class="sd">Takes environment variables and puts them into dictionaries.</span>
 <span class="sd">#### IBM</span>
-<span class="sd">    | Environment Variable     	| Config Dictionary           	|</span>
-<span class="sd">    |--------------------------	|-----------------------------	|</span>
-<span class="sd">    | CSUTIL_IBM_API_KEY       	| IBM_CONFIG[&#39;api_key&#39;]       	|</span>
-<span class="sd">    | CSUTIL_IBM_AUTH_ENDPOINT 	| IBM_CONFIG[&#39;auth_endpoint&#39;] 	|</span>
-<span class="sd">    | CSUTIL_IBM_COS_ENDPOINT  	| IBM_CONFIG[&#39;cos_endpoint&#39;]  	|</span>
+<span class="sd">    | Environment Variable              | Config Dictionary           |</span>
+<span class="sd">    |------------------------------     |-----------------------------|</span>
+<span class="sd">    | IBMCLOUD_API_KEY (preferred)      | IBM_CONFIG[&#39;api_key&#39;]       |</span>
+<span class="sd">    | CSUTIL_IBM_API_KEY                | IBM_CONFIG[&#39;api_key&#39;]       |</span>
+<span class="sd">    | CSUTIL_IBM_AUTH_ENDPOINT          | IBM_CONFIG[&#39;auth_endpoint&#39;] |</span>
+<span class="sd">    | CSUTIL_IBM_COS_ENDPOINT           | IBM_CONFIG[&#39;cos_endpoint&#39;]  |</span>
+
 
 <span class="sd">#### Azure</span>
 <span class="sd">    | Environment Variable              	| Config Dictionary                    	|</span>

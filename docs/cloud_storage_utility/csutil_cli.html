@@ -291,15 +291,8 @@
 <span class="nd">@execute_cli</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;cloud-bucket&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;cloud-key-wildcard&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">UNLIMITED_ARGS</span><span class="p">)</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s2">&quot;-p&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;--prefix&quot;</span><span class="p">,</span>
-    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only pull files with matching prefix&quot;</span><span class="p">,</span>
-    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="p">)</span>
 <span class="nd">@run_async</span>
-<span class="k">async</span> <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">cloud_bucket</span><span class="p">,</span> <span class="n">cloud_key_wildcard</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">cloud_bucket</span><span class="p">,</span> <span class="n">cloud_key_wildcard</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Delete files from the cloud bucket.&quot;&quot;&quot;</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">()</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
         <span class="n">bucket_contents</span> <span class="o">=</span> <span class="k">await</span> <span class="n">file_broker</span><span class="o">.</span><span class="n">get_bucket_keys</span><span class="p">(</span><span class="n">cloud_bucket</span><span class="p">)</span>
@@ -319,7 +312,6 @@
             <span class="k">await</span> <span class="n">file_broker</span><span class="o">.</span><span class="n">remove_items</span><span class="p">(</span>
                 <span class="n">cloud_bucket</span><span class="p">,</span>
                 <span class="n">keys_to_delete</span><span class="p">,</span>
-                <span class="n">prefix</span><span class="p">,</span>
                 <span class="k">lambda</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">__update_pbar_remove</span><span class="p">(</span><span class="n">pbar</span><span class="p">,</span> <span class="n">file_path</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>

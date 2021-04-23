@@ -3,11 +3,13 @@ Loads dotenv, if there is one.
 
 Takes environment variables and puts them into dictionaries.
 #### IBM
-    | Environment Variable     	| Config Dictionary           	|
-    |--------------------------	|-----------------------------	|
-    | CSUTIL_IBM_API_KEY       	| IBM_CONFIG['api_key']       	|
-    | CSUTIL_IBM_AUTH_ENDPOINT 	| IBM_CONFIG['auth_endpoint'] 	|
-    | CSUTIL_IBM_COS_ENDPOINT  	| IBM_CONFIG['cos_endpoint']  	|
+    | Environment Variable              | Config Dictionary           |
+    |------------------------------     |-----------------------------|
+    | IBMCLOUD_API_KEY (preferred)      | IBM_CONFIG['api_key']       |
+    | CSUTIL_IBM_API_KEY                | IBM_CONFIG['api_key']       |
+    | CSUTIL_IBM_AUTH_ENDPOINT          | IBM_CONFIG['auth_endpoint'] |
+    | CSUTIL_IBM_COS_ENDPOINT           | IBM_CONFIG['cos_endpoint']  |
+
 
 #### Azure
     | Environment Variable              	| Config Dictionary                    	|

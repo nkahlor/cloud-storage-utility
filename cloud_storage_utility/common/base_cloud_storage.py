@@ -1,6 +1,7 @@
 import abc
+from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
 import os
-from typing import Any, Callable, Coroutine, List
+from typing import Any, Callable, Coroutine, Dict, List
 
 from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
 from cloud_storage_utility.common.util import strip_prefix
@@ -37,16 +38,38 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         self.file_threshold = file_threshold
 
     @abc.abstractmethod
-    def get_bucket_keys(self, bucket_name: str) -> List[str]:
+    def get_bucket_keys(
+        self, bucket_name: str, prefix: str = "", delimiter: str = "/"
+    ) -> Dict[str, BucketKeyMetadata]:
         """An implementation of this must provide a way to list the contents of a bucket.
 
         Args:
-            bucket_name (str): Target bucket
+            bucket_name (str):
+                Target bucket.
+            prefix (str, optional):
+                Only get keys that match this prefix.
+            delimiter (str, optional):
+                Set the delimiter, defaults to '/'. i.e, photos/image.jpeg
 
         Returns:
-            List[str]: Keys within the bucket
+            Dict[str, BucketKeyMetadata]:
+                Dictionary of key name -> KeyMetadata, i.e.
+
+            ```
+            {
+                "image.jpeg": {
+                    "bytes": 32,
+                    "last_modified": 1619195172
+                },
+                "file.txt": {
+                    "bytes": 32,
+                    "last_modified": 1619195172
+                }
+            }
+            ```
+
         """
-        return []
+        return {}
 
     @abc.abstractmethod
     async def upload_file(
@@ -54,10 +77,10 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         bucket_name: str,
         cloud_key: str,
         file_path: str,
-        prefix: str = None,
+        prefix: str = "",
         callback: Callable[[str, str, str, bool], None] = None,
-    ) -> None:
-        """An implementation fo this must provide a way to upload a single file.
+    ) -> bool:
+        """An implementation of this must provide a way to upload a single file, with a specified prefix.
 
         Args:
             bucket_name (str):
@@ -66,8 +89,14 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
                 What to name the file in the cloud.
             file_path (str):
                 Where to get the file from locally.
+            prefix (str, optional):
+                Prefix to prepend in the cloud.
             callback (function, optional):
                 Implementations of this method need to call this after the operation is complete. Defaults to None.
+
+        Returns:
+            bool:
+                Whether the upload was successful or not.
         """
         return
 
@@ -75,7 +104,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         self,
         bucket_name: str,
         cloud_map_list: List[CloudLocalMap],
-        prefix: str = None,
+        prefix: str = "",
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> List[Coroutine[Any, Any, None]]:
         """Collect all of the coroutines necessary to complete the requested uploads.
@@ -85,6 +114,8 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
                 Target bucket.
             cloud_map_list (List[CloudLocalMap]):
                 List of local to remote file name pairings.
+            prefix (str, optional):
+                Prefix to apply to every file we upload.
             callback (function, optional):
                 Passes the callback into each coroutine. Defaults to None.
 
@@ -112,9 +143,8 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         self,
         bucket_name: str,
         cloud_key: str,
-        prefix: str,
         callback: Callable[[str, str, str], None] = None,
-    ) -> None:
+    ) -> bool:
         """An implementation for this must provide a way to send removal requests.
 
         Args:
@@ -124,6 +154,10 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
                 The name of the key we want to remove.
             callback (Callable[[str, str, str], None], optional):
                 Implementations of this method need to call this after the operation is complete. Defaults to None.
+
+        Returns:
+            bool:
+                Whether the remove was successful or not.
         """
         return
 
@@ -131,7 +165,6 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         self,
         bucket_name: str,
         item_names: List[str],
-        prefix: str,
         callback: Callable[[str, str, str], None] = None,
     ) -> List[Coroutine[Any, Any, None]]:
         """Get a list of all the coroutines needed to perform the requested removal.
@@ -155,7 +188,6 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
                 self.remove_item(
                     bucket_name=bucket_name,
                     cloud_key=item,
-                    prefix=prefix,
                     callback=callback,
                 )
             )
@@ -167,9 +199,9 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         bucket_name: str,
         cloud_key: str,
         destination_filepath: str,
-        prefix: str = None,
+        prefix: str = "",
         callback: Callable[[str, str, str, bool], None] = None,
-    ) -> None:
+    ) -> bool:
         """An implementation for this must provide a way to download a single file.
 
         Args:
@@ -179,8 +211,14 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
                 The name of the item we want to download from the cloud bucket.
             destination_filepath (str):
                 Where to put the downloaded item.
+            prefix (str, optional):
+                Only download files under the matching prefix.
             callback (Callable[[str, str, str, bool], None], optional):
                 Implementations of this method need to call this after the operation is complete. Defaults to None.
+
+        Returns:
+            bool:
+                Whether the download was successful or not.
         """
         return
 
@@ -189,7 +227,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
         bucket_name: str,
         local_directory: str,
         cloud_key_list: List[str],
-        prefix=None,
+        prefix: str = "",
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> List[Coroutine[Any, Any, None]]:
         """Get a list of all the coroutines needed to perform the requested download.
@@ -201,6 +239,8 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
                 Where to put the files downloaded.
             cloud_key_list (List[str]):
                 List of cloud keys to download.
+            prefix (str, optional):
+                Prefix to apply to every file we download.
             callback (Callable[[str, str, str, bool], None], optional):
                 Implementations of this method need to call this after the operation is complete. Defaults to None.
 

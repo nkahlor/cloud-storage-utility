@@ -327,7 +327,7 @@ inherit from this.</p>
 
         </details>
 
-            <div class="docstring"><p>An implementation fo this must provide a way to upload a single file.</p>
+            <div class="docstring"><p>An implementation of this must provide a way to upload a single file, with a specified prefix.</p>
 
 <h6 id="args">Args</h6>
 
@@ -335,8 +335,16 @@ inherit from this.</p>
 <li><strong>bucket_name (str):</strong>  Target bucket.</li>
 <li><strong>cloud_key (str):</strong>  What to name the file in the cloud.</li>
 <li><strong>file_path (str):</strong>  Where to get the file from locally.</li>
+<li><strong>prefix (str, optional):</strong>  Prefix to prepend in the cloud.</li>
 <li><strong>callback (function, optional):</strong>  Implementations of this method need to call this after the operation is complete. Defaults to None.</li>
 </ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>bool:
+      Whether the upload was successful or not.</p>
+</blockquote>
 </div>
 
 
@@ -369,6 +377,13 @@ inherit from this.</p>
 <li><strong>cloud_key (str):</strong>  The name of the key we want to remove.</li>
 <li><strong>callback (Callable[[str, str, str], None], optional):</strong>  Implementations of this method need to call this after the operation is complete. Defaults to None.</li>
 </ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>bool:
+      Whether the remove was successful or not.</p>
+</blockquote>
 </div>
 
 
@@ -423,8 +438,16 @@ inherit from this.</p>
 <li><strong>bucket_name (str):</strong>  Target bucket.</li>
 <li><strong>cloud_key (str):</strong>  The name of the item we want to download from the cloud bucket.</li>
 <li><strong>destination_filepath (str):</strong>  Where to put the downloaded item.</li>
+<li><strong>prefix (str, optional):</strong>  Only download files under the matching prefix.</li>
 <li><strong>callback (Callable[[str, str, str, bool], None], optional):</strong>  Implementations of this method need to call this after the operation is complete. Defaults to None.</li>
 </ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>bool:
+      Whether the download was successful or not.</p>
+</blockquote>
 </div>
 
 
@@ -456,13 +479,30 @@ inherit from this.</p>
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>bucket_name (str):</strong>  Target bucket</li>
+<li><strong>bucket_name (str):</strong>  Target bucket.</li>
+<li><strong>prefix (str, optional):</strong>  Only get keys that match this prefix.</li>
+<li><strong>delimiter (str, optional):</strong>  Set the delimiter, defaults to '/'. i.e, photos/image.jpeg</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>List[str]: Keys within the bucket</p>
+  <p>Dict[str, BucketKeyMetadata]:
+      Dictionary of key name -> KeyMetadata, i.e.</p>
+</blockquote>
+
+<blockquote>
+<pre><code>{
+    "image.jpeg": {
+        "bytes": 32,
+        "last_modified": 1619195172
+    },
+    "file.txt": {
+        "bytes": 32,
+        "last_modified": 1619195172
+    }
+}
+</code></pre>
 </blockquote>
 </div>
 

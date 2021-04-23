@@ -95,7 +95,33 @@
 
 
 <span class="k">class</span> <span class="nc">FileBroker</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Executes file operations with the specified underlying platform implementation.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Executes file operations with the specified underlying platform implementation.</span>
+
+<span class="sd">    This is implemented as an async context manager, due to the underlying need to manage aiohttp sessions.</span>
+
+<span class="sd">    There are 2 ways to use this class:</span>
+
+<span class="sd">    The ideal way is to use `async with` syntax, don&#39;t forget to use the `async` keyword, it&#39;s important!</span>
+<span class="sd">    ```</span>
+<span class="sd">    async with FileBroker() as file_broker:</span>
+<span class="sd">        file_broker.upload_files(...)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Alternatively, you can manually call  `open` and `close` to manage the http connections.</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    file_broker = FileBroker()</span>
+<span class="sd">    file_broker.open()</span>
+
+<span class="sd">    file_broker.upload_files(...)</span>
+
+<span class="sd">    file_broker.close()</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Generally, you only really want 1 file broker per application. You don&#39;t really need to open a ton of http sessions</span>
+<span class="sd">    if you&#39;re connecting to the same host each time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">DEFAULT_PLATFORM</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">platform</span> <span class="o">=</span> <span class="n">platform</span>
@@ -194,7 +220,6 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">cloud_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Remove the specified keys from the bucket. Does not remove local files.</span>
@@ -211,7 +236,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">remove_tasks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">get_remove_items_coroutines</span><span class="p">(</span>
-            <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_keys</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">callback</span>
+            <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_keys</span><span class="p">,</span> <span class="n">callback</span>
         <span class="p">)</span>
         <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">remove_tasks</span><span class="p">)</span>
 
@@ -271,7 +296,33 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">FileBroker</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Executes file operations with the specified underlying platform implementation.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Executes file operations with the specified underlying platform implementation.</span>
+
+<span class="sd">    This is implemented as an async context manager, due to the underlying need to manage aiohttp sessions.</span>
+
+<span class="sd">    There are 2 ways to use this class:</span>
+
+<span class="sd">    The ideal way is to use `async with` syntax, don&#39;t forget to use the `async` keyword, it&#39;s important!</span>
+<span class="sd">    ```</span>
+<span class="sd">    async with FileBroker() as file_broker:</span>
+<span class="sd">        file_broker.upload_files(...)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Alternatively, you can manually call  `open` and `close` to manage the http connections.</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    file_broker = FileBroker()</span>
+<span class="sd">    file_broker.open()</span>
+
+<span class="sd">    file_broker.upload_files(...)</span>
+
+<span class="sd">    file_broker.close()</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Generally, you only really want 1 file broker per application. You don&#39;t really need to open a ton of http sessions</span>
+<span class="sd">    if you&#39;re connecting to the same host each time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">DEFAULT_PLATFORM</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">platform</span> <span class="o">=</span> <span class="n">platform</span>
@@ -370,7 +421,6 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">cloud_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Remove the specified keys from the bucket. Does not remove local files.</span>
@@ -387,7 +437,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">remove_tasks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">get_remove_items_coroutines</span><span class="p">(</span>
-            <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_keys</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">callback</span>
+            <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_keys</span><span class="p">,</span> <span class="n">callback</span>
         <span class="p">)</span>
         <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">remove_tasks</span><span class="p">)</span>
 
@@ -435,6 +485,29 @@
         </details>
 
             <div class="docstring"><p>Executes file operations with the specified underlying platform implementation.</p>
+
+<p>This is implemented as an async context manager, due to the underlying need to manage aiohttp sessions.</p>
+
+<p>There are 2 ways to use this class:</p>
+
+<p>The ideal way is to use <code>async with</code> syntax, don't forget to use the <code>async</code> keyword, it's important!</p>
+
+<pre><code>async with FileBroker() as file_broker:
+    file_broker.upload_files(...)
+</code></pre>
+
+<p>Alternatively, you can manually call  <code><a href="#FileBroker.open">open</a></code> and <code><a href="#FileBroker.close">close</a></code> to manage the http connections.</p>
+
+<div class="codehilite"><pre><span></span><code><span class="n">file_broker</span> <span class="o">=</span> <span class="n">FileBroker</span><span class="p">()</span>
+<span class="n">file_broker</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+
+<span class="n">file_broker</span><span class="o">.</span><span class="n">upload_files</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+
+<span class="n">file_broker</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+
+<p>Generally, you only really want 1 file broker per application. You don't really need to open a ton of http sessions
+if you're connecting to the same host each time.</p>
 </div>
 
 
@@ -674,7 +747,6 @@ Defaults to None.</li>
     self,
     bucket_name: str,
     cloud_keys: List[str],
-    prefix: str = None,
     callback: Callable[[str, str, str], NoneType] = None
 ) -&gt; None</span>:
     </div>
@@ -685,7 +757,6 @@ Defaults to None.</li>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">cloud_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Remove the specified keys from the bucket. Does not remove local files.</span>
@@ -702,7 +773,7 @@ Defaults to None.</li>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">remove_tasks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">get_remove_items_coroutines</span><span class="p">(</span>
-            <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_keys</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">callback</span>
+            <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_keys</span><span class="p">,</span> <span class="n">callback</span>
         <span class="p">)</span>
         <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">remove_tasks</span><span class="p">)</span>
 </pre></div>

@@ -1,10 +1,11 @@
 """Routes cloud storage operations to underlying platform implementations."""
 
 import asyncio
+from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
 import os
 import sys
 from itertools import groupby
-from typing import Callable, List
+from typing import Callable, Dict, List
 
 import aiohttp
 
@@ -16,7 +17,33 @@ from .platforms.ibm_cloud_storage import IbmCloudStorage
 
 
 class FileBroker:
-    """Executes file operations with the specified underlying platform implementation."""
+    """
+    Executes file operations with the specified underlying platform implementation.
+
+    This is implemented as an async context manager, due to the underlying need to manage aiohttp sessions.
+
+    There are 2 ways to use this class:
+
+    The ideal way is to use `async with` syntax, don't forget to use the `async` keyword, it's important!
+    ```
+    async with FileBroker() as file_broker:
+        file_broker.upload_files(...)
+    ```
+
+    Alternatively, you can manually call  `open` and `close` to manage the http connections.
+
+    ```
+    file_broker = FileBroker()
+    file_broker.open()
+
+    file_broker.upload_files(...)
+
+    file_broker.close()
+    ```
+
+    Generally, you only really want 1 file broker per application. You don't really need to open a ton of http sessions
+    if you're connecting to the same host each time.
+    """
 
     def __init__(self, platform: str = config.DEFAULT_PLATFORM):
         self.platform = platform
@@ -42,18 +69,22 @@ class FileBroker:
         return aiohttp.ClientSession()
 
     async def open(self):
+        """ Open an aiohttp session """
         return await self.__aenter__()
 
     async def close(self):
+        """ Close the aiohttp session """
         await self.__aexit__(*sys.exc_info())
 
     async def get_bucket_keys(
-        self, bucket_name: str, prefix: str = None, delimiter: str = None
-    ) -> List[str]:
+        self, bucket_name: str, prefix: str = "", delimiter: str = "/"
+    ) -> Dict[str, BucketKeyMetadata]:
         """Get the names of all the keys in the bucket.
 
         Args:
             bucket_name(str): The target bucket
+            prefix(str, optional): Only return keys matching this prefix
+            delimiter(str, optional): Delimiter between prefix and key-name
 
         Returns:
             List of keys from the targeted bucket
@@ -64,7 +95,7 @@ class FileBroker:
         self,
         bucket_name: str,
         cloud_map_list: List[CloudLocalMap],
-        prefix: str = None,
+        prefix: str = "",
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> None:
         """Upload a list of files from a local directory, and map them to they respective cloud keys in a particular bucket.
@@ -74,6 +105,8 @@ class FileBroker:
                 The target bucket.
             cloud_map_list (CloudLocalMap[]):
                 List of local files to upload, and what to name them in the cloud.
+            prefix (str, optional):
+                Prefix to prepend in the cloud.
             callback (function, optional):
                 Optional callback to execute after every file upload completes.
                 Takes the parameters: bucket_name, cloud_key, file_path, removal_succeeded.
@@ -89,7 +122,7 @@ class FileBroker:
         bucket_name: str,
         local_directory: str,
         file_names: List[str],
-        prefix: str = None,
+        prefix: str = "",
         callback: Callable[[str, str, str, bool], None] = None,
     ) -> None:
         """Download all of the requested files from the bucket, and place them in the specified directory.
@@ -101,6 +134,8 @@ class FileBroker:
                 The destination folder. Must already exist.
             file_names (str[]):
                 A list of the files we want to download.
+            prefix (str, optional):
+                Only download files with the matching prefix.
             callback (function, optional):
                 Optional callback to execute after every file download completes.
                 Takes the parameters: bucket_name, cloud_key, file_path, download_succeeded.
@@ -115,7 +150,6 @@ class FileBroker:
         self,
         bucket_name: str,
         cloud_keys: List[str],
-        prefix: str = None,
         callback: Callable[[str, str, str], None] = None,
     ) -> None:
         """Remove the specified keys from the bucket. Does not remove local files.
@@ -132,7 +166,7 @@ class FileBroker:
         """
 
         remove_tasks = self.service.get_remove_items_coroutines(
-            bucket_name, cloud_keys, prefix, callback
+            bucket_name, cloud_keys, callback
         )
         await asyncio.gather(*remove_tasks)
 
@@ -140,7 +174,7 @@ class FileBroker:
         self,
         file_paths: List[str],
         bucket_name: str,
-        prefix: str = None,
+        prefix: str = "",
     ) -> None:
         """If any of the files in file_paths are missing locally, go get them from the cloud bucket.
 
@@ -151,6 +185,8 @@ class FileBroker:
                 List of local file paths you want to synchronize.
             bucket_name (str):
                 Target bucket.
+            prefix(str, optional):
+                Only sync files with the matching prefix.
         """
 
         # Exclude all files that exist locally
@@ -173,5 +209,6 @@ class FileBroker:
                 bucket_name=bucket_name,
                 local_directory=key,
                 file_names=cloud_keys,
+                prefix=prefix,
                 callback=None,
             )

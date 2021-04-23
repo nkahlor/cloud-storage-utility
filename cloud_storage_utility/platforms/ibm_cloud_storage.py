@@ -1,7 +1,9 @@
 import base64
+from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
 import hashlib
 import logging
 import time
+from typing import Dict
 
 import xmltodict
 
@@ -21,7 +23,9 @@ class IbmCloudStorage(BaseCloudStorage):
         self.__expires_at = -1
         self.__access_token = ""
 
-    async def get_bucket_keys(self, bucket_name, prefix=None, delimiter=None):
+    async def get_bucket_keys(
+        self, bucket_name: str, prefix: str = "", delimiter="/"
+    ) -> Dict[str, BucketKeyMetadata]:
         try:
             access_token = await self.__get_auth_token()
             headers = {
@@ -86,9 +90,9 @@ class IbmCloudStorage(BaseCloudStorage):
         bucket_name,
         cloud_key,
         file_path,
-        prefix=None,
+        prefix="",
         callback=None,
-    ):
+    ) -> bool:
         """
         Note: This should only be used for files < 500MB. When you need to upload larger files, you have to
         implement multi-part uploads.
@@ -124,7 +128,8 @@ class IbmCloudStorage(BaseCloudStorage):
                 )
         return upload_succeeded
 
-    async def remove_item(self, bucket_name, delete_request, prefix="", callback=None):
+    async def remove_item(self, bucket_name, delete_request, callback=None) -> bool:
+        removal_succeeded = True
         try:
             xml_body = xmltodict.unparse({"Delete": delete_request})
             access_token = await self.__get_auth_token()
@@ -150,14 +155,14 @@ class IbmCloudStorage(BaseCloudStorage):
                     file_list = [elem["Key"] for elem in dict_response]
         except Exception as error:
             logging.exception(error)
+            removal_succeeded = False
         finally:
             if callback is not None:
                 callback(bucket_name, file_list)
+        return removal_succeeded
 
     # Overriding the parent function because we can make it more efficient
-    def get_remove_items_coroutines(
-        self, bucket_name, item_names, prefix="", callback=None
-    ):
+    def get_remove_items_coroutines(self, bucket_name, item_names, callback=None):
         # do nothing
         if len(item_names) == 0:
             return []
@@ -183,9 +188,7 @@ class IbmCloudStorage(BaseCloudStorage):
             logging.exception(error)
 
         for request in delete_requests:
-            delete_tasks.append(
-                self.remove_item(bucket_name, request, prefix, callback)
-            )
+            delete_tasks.append(self.remove_item(bucket_name, request, callback))
 
         return delete_tasks
 
@@ -194,9 +197,9 @@ class IbmCloudStorage(BaseCloudStorage):
         bucket_name,
         cloud_key,
         destination_filepath,
-        prefix: str = None,
+        prefix: str = "",
         callback=None,
-    ):
+    ) -> bool:
         download_succeeded = None
         try:
             if prefix:
