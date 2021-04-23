@@ -91,7 +91,7 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main)
 ```
-
+Check out the [API docs](https://nkahlor.github.io/cloud-storage-utility/cloud_storage_utility.html) for many more detailed examples!
 ## Developing Locally
 
 We use `pipenv` to manage packages. If you don't already have it installed, make sure to install it via `pip install pipenv`.
