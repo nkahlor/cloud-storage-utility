@@ -79,7 +79,7 @@ class TestFileBroker:
                 return_value=[tmp_task()]
             )
 
-            args = ("test", ["test"], "", None)
+            args = ("test", ["test"], None)
             await file_broker.remove_items(*args)
 
             file_broker.service.get_remove_items_coroutines.assert_called_with(*args)
