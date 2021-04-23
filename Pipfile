@@ -24,10 +24,10 @@ tqdm = "*"
 colorama = "*"
 aiohttp = "*"
 xmltodict = "*"
+setuptools-scm = "*"
 
 [dev-packages]
 setuptools = "*"
-setuptools-scm = "*"
 wheel = "*"
 twine = "*"
 flake8 = "*"
