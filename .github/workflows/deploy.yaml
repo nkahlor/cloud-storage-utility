@@ -55,6 +55,7 @@ jobs:
 
       # No matter the type of release, send it here to test
       - name: Publish distribution 📦 to Test PyPI
+        if: "github.event.release.prerelease"
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
