@@ -2,7 +2,7 @@ import asyncio
 
 import pytest
 
-from cloud_storage_utility.config.config import DEFAULT_PLATFORM
+from cloud_storage_utility.config.config import COS_CONFIG, DEFAULT_PLATFORM
 from cloud_storage_utility.file_broker import FileBroker
 from cloud_storage_utility.platforms.ibm_cloud_storage import IbmCloudStorage
 
@@ -15,25 +15,13 @@ async def tmp_task():
 
 
 class TestFileBroker:
-    @staticmethod
-    def get_loop_spy(mocker, event_loop):
-        spy_loop = mocker.Mock(wraps=event_loop)
-        mock_get_loop = mocker.patch.object(asyncio, "get_event_loop")
-        mock_get_loop.return_value = spy_loop
-        return spy_loop
-
-    @staticmethod
-    def assert_loop_invoked(spy_loop):
-        spy_loop.run_until_complete.assert_called()
-        spy_loop.close.assert_called()
-
     async def test_broker_uses_default_platform_when_not_specified(self):
-        async with FileBroker() as file_broker:
+        async with FileBroker(COS_CONFIG[DEFAULT_PLATFORM]) as file_broker:
             assert file_broker.platform == DEFAULT_PLATFORM
             assert isinstance(file_broker.service, IbmCloudStorage)
 
     async def test_upload_files_calls_service(self, mocker):
-        async with FileBroker() as file_broker:
+        async with FileBroker(COS_CONFIG[DEFAULT_PLATFORM]) as file_broker:
             file_broker.service.get_upload_files_coroutines = mocker.Mock(
                 return_value=[tmp_task()]
             )
@@ -44,7 +32,7 @@ class TestFileBroker:
             file_broker.service.get_upload_files_coroutines.assert_called_with(*args)
 
     async def test_download_files_calls_service(self, event_loop, mocker):
-        async with FileBroker() as file_broker:
+        async with FileBroker(COS_CONFIG[DEFAULT_PLATFORM]) as file_broker:
             file_broker.service.get_download_files_coroutines = mocker.Mock(
                 return_value=[tmp_task()]
             )
@@ -55,7 +43,7 @@ class TestFileBroker:
             file_broker.service.get_download_files_coroutines.assert_called_with(*args)
 
     async def test_get_bucket_keys_calls_service(self, mocker):
-        async with FileBroker() as file_broker:
+        async with FileBroker(COS_CONFIG[DEFAULT_PLATFORM]) as file_broker:
             result = asyncio.Future()
             result.set_result({"test.txt": {"bytes": 0, "last_modified": ""}})
             file_broker.service.get_bucket_keys = mocker.Mock(return_value=result)
@@ -66,7 +54,7 @@ class TestFileBroker:
             assert bucket_key_list == await result
 
     async def test_remove_items_calls_service(self, event_loop, mocker):
-        async with FileBroker() as file_broker:
+        async with FileBroker(COS_CONFIG[DEFAULT_PLATFORM]) as file_broker:
             file_broker.service.get_remove_items_coroutines = mocker.Mock(
                 return_value=[tmp_task()]
             )

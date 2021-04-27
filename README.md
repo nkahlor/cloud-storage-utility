@@ -35,21 +35,9 @@ CSUTIL_IBM_API_KEY=
 CSUTIL_IBM_AUTH_ENDPOINT=
 CSUTIL_IBM_COS_ENDPOINT=
 
-# You only need to set these if you intend to use azure
-CSUTIL_AZURE_STORAGE_ACCOUNT_NAME=
-CSUTIL_AZURE_TENANT_ID=
-CSUTIL_AZURE_CLIENT_ID=
-CSUTIL_AZURE_CLIENT_SECRET=
-
-# You can also just include the connections string instead!
-CSUTIL_AZURE_CONNECTION_STRING=
-
-# set them all if you intend to use this tool for both platforms
+# If `CSUTIL_IBM_API_KEY` is undefined, we will attempt to use `IBMCLOUD_API_KEY` instead.
 ```
 
-By default, the CLI will attempt to use IBM
-
-Note: for IBM, if `CSUTIL_IBM_API_KEY` is undefined, we will attempt to use `IBMCLOUD_API_KEY` instead.
 
 #### CLI Commands
 

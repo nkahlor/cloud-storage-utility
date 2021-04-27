@@ -1,6 +1,7 @@
 """Root module for csutil CLI."""
 
 import asyncio
+from cloud_storage_utility.config.config import COS_CONFIG, DEFAULT_PLATFORM
 import fnmatch
 import glob
 import logging
@@ -23,6 +24,7 @@ PROGRESS_BAR_COLOR = "blue"
 PROGRESS_BAR_UNITS = "files"
 
 DESIRED_PLATFORM = os.getenv("CSUTIL_DEFAULT_PLATFORM")
+CONFIG = COS_CONFIG[DEFAULT_PLATFORM]
 
 init()
 logging.basicConfig(filename="csutil-error.log", level=logging.WARNING)
@@ -119,7 +121,6 @@ def execute_cli():
     pass
 
 
-# TODO: Allow filtering of these keys so we can search the contents of a bucket
 @execute_cli.command()
 @click.argument("bucket-name", type=click.STRING)
 @click.argument("cloud-key-wildcards", type=click.STRING, nargs=UNLIMITED_ARGS)
@@ -136,7 +137,7 @@ def execute_cli():
 @run_async
 async def list_remote(bucket_name, cloud_key_wildcards, prefix, delimiter):
     """List contents of cloud bucket."""
-    async with FileBroker() as file_broker:
+    async with FileBroker(CONFIG) as file_broker:
         keys = await file_broker.get_bucket_keys(bucket_name, prefix, delimiter)
         if len(keys) == 0:
             print(f"No Keys found matching the prefix {prefix} in {bucket_name}")
@@ -187,7 +188,7 @@ async def push(fail_fast, local_file_pattern, cloud_bucket, prefix):
             unit=PROGRESS_BAR_UNITS,
             colour=PROGRESS_BAR_COLOR,
         )
-        async with FileBroker() as file_broker:
+        async with FileBroker(CONFIG) as file_broker:
             await file_broker.upload_files(
                 cloud_bucket,
                 cloud_map_list,
@@ -221,7 +222,7 @@ async def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards, pr
     IMPORTANT: WRAP YOUR WILDCARDS IN QUOTES
     """
     # Get the names of all the files in the bucket
-    async with FileBroker() as file_broker:
+    async with FileBroker(CONFIG) as file_broker:
         bucket_contents = await file_broker.get_bucket_keys(cloud_bucket, prefix)
         # Filter out the ones we need
         keys_to_download = __filter_cloud_keys(
@@ -264,7 +265,7 @@ async def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards, pr
 @run_async
 async def delete(cloud_bucket, cloud_key_wildcards, prefix):
     """Delete files from the cloud bucket."""
-    async with FileBroker() as file_broker:
+    async with FileBroker(CONFIG) as file_broker:
         bucket_contents = await file_broker.get_bucket_keys(cloud_bucket, prefix)
         keys_to_delete = __filter_cloud_keys(
             cloud_key_wildcards, bucket_contents, prefix

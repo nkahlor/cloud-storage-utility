@@ -1,4 +1,5 @@
 import base64
+from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
 import hashlib
 import logging
 import time
@@ -9,17 +10,16 @@ import xmltodict
 from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
 
 from ..common.base_cloud_storage import BaseCloudStorage
-from ..config import config
 
 
 class IbmCloudStorage(BaseCloudStorage):
     """File operation implementations for IBM platform."""
 
-    def __init__(self, session):
+    def __init__(self, session, ibm_config: IbmConfiguration):
         super().__init__()
-        self.__api_key = config.IBM_CONFIG["api_key"]
-        self.__auth_endpoint = config.IBM_CONFIG["auth_endpoint"]
-        self.__cos_endpoint = config.IBM_CONFIG["cos_endpoint"]
+        self.__api_key = ibm_config.api_key
+        self.__auth_endpoint = ibm_config.auth_endpoint
+        self.__cos_endpoint = ibm_config.cos_endpoint
         self.__session = session
         self.__expires_at = -1
         self.__access_token = ""

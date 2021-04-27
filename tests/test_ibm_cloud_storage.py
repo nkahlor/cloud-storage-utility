@@ -2,8 +2,10 @@ import aiohttp
 import pytest
 from aioresponses import aioresponses
 
-from cloud_storage_utility.config import config
 from cloud_storage_utility.platforms.ibm_cloud_storage import IbmCloudStorage
+from cloud_storage_utility.config.config import COS_CONFIG, SupportedPlatforms
+
+config = COS_CONFIG[SupportedPlatforms.IBM]
 
 
 class TestIbmCloudStorage:
@@ -14,7 +16,7 @@ class TestIbmCloudStorage:
     @pytest.mark.asyncio
     async def test_upload_file_succeeds(self, mocker):
         async with aiohttp.ClientSession() as session:
-            ibm_service = IbmCloudStorage(session)
+            ibm_service = IbmCloudStorage(session, config)
 
             mock_file = mocker.mock_open(read_data="test")
             mocker.patch(
@@ -22,10 +24,10 @@ class TestIbmCloudStorage:
             )
 
             with aioresponses() as mock_response:
-                endpoint = f"{config.IBM_CONFIG['cos_endpoint']}/test/test_data_1.txt"
+                endpoint = f"{config.cos_endpoint}/test/test_data_1.txt"
                 mock_response.put(endpoint, status=200)
                 mock_response.post(
-                    f"{config.IBM_CONFIG['auth_endpoint']}",
+                    f"{config.auth_endpoint}",
                     payload={"access_token": "", "expiration": ""},
                 )
                 response = await ibm_service.upload_file(
@@ -37,7 +39,7 @@ class TestIbmCloudStorage:
     @pytest.mark.asyncio
     async def test_upload_file_executes_its_callback_on_success(self, mocker):
         async with aiohttp.ClientSession() as session:
-            ibm_service = IbmCloudStorage(session)
+            ibm_service = IbmCloudStorage(session, config)
             mock_callback = mocker.Mock()
 
             mock_file = mocker.mock_open(read_data="test")
@@ -46,10 +48,10 @@ class TestIbmCloudStorage:
             )
 
             with aioresponses() as mock_response:
-                endpoint = f"{config.IBM_CONFIG['cos_endpoint']}/test/test_data_1.txt"
+                endpoint = f"{config.cos_endpoint}/test/test_data_1.txt"
                 mock_response.put(endpoint, status=200)
                 mock_response.post(
-                    f"{config.IBM_CONFIG['auth_endpoint']}",
+                    f"{config.auth_endpoint}",
                     payload={"access_token": "", "expiration": ""},
                 )
                 response = await ibm_service.upload_file(
@@ -65,14 +67,14 @@ class TestIbmCloudStorage:
     @pytest.mark.asyncio
     async def test_upload_file_executes_callback_on_fail(self, mocker):
         async with aiohttp.ClientSession() as session:
-            ibm_service = IbmCloudStorage(session)
+            ibm_service = IbmCloudStorage(session, config)
             mock_callback = mocker.Mock()
 
             with aioresponses() as mock_response:
-                endpoint = f"{config.IBM_CONFIG['cos_endpoint']}/test/test_data_1.txt"
+                endpoint = f"{config.cos_endpoint}/test/test_data_1.txt"
                 mock_response.put(endpoint, status=404)
                 mock_response.post(
-                    f"{config.IBM_CONFIG['auth_endpoint']}",
+                    f"{config.auth_endpoint}",
                     payload={"access_token": "", "expiration": ""},
                 )
                 response = await ibm_service.upload_file(
@@ -88,13 +90,13 @@ class TestIbmCloudStorage:
     @pytest.mark.asyncio
     async def test_upload_file_fails_on_missing_local_file(self, mocker):
         async with aiohttp.ClientSession() as session:
-            ibm_service = IbmCloudStorage(session)
+            ibm_service = IbmCloudStorage(session, config)
 
             with aioresponses() as mock_response:
-                endpoint = f"{config.IBM_CONFIG['cos_endpoint']}/test/test_data_1.txt"
+                endpoint = f"{config.cos_endpoint}/test/test_data_1.txt"
                 mock_response.put(endpoint, status=200)
                 mock_response.post(
-                    f"{config.IBM_CONFIG['auth_endpoint']}",
+                    f"{config.auth_endpoint}",
                     payload={"access_token": "", "expiration": ""},
                 )
                 response = await ibm_service.upload_file(

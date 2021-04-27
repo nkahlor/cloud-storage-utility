@@ -1,10 +1,11 @@
 """Routes cloud storage operations to underlying platform implementations."""
 
 import asyncio
+from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
 import os
 import sys
 from itertools import groupby
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Union
 
 import aiohttp
 
@@ -44,8 +45,13 @@ class FileBroker:
     if you're connecting to the same host each time.
     """
 
-    def __init__(self, platform: str = config.DEFAULT_PLATFORM):
+    def __init__(
+        self,
+        configuration: Union[IbmConfiguration],
+        platform: str = config.DEFAULT_PLATFORM,
+    ):
         self.platform = platform
+        self.config = configuration
         self.session = None
         self.service = None
 
@@ -53,7 +59,7 @@ class FileBroker:
         self.session = await self.__create_aiohttp_session()
 
         if self.platform == config.SupportedPlatforms.IBM:
-            self.service = IbmCloudStorage(self.session)
+            self.service = IbmCloudStorage(self.session, self.config)
         else:
             raise Exception("Cloud platform not supported")
 

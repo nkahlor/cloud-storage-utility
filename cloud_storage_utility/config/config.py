@@ -11,6 +11,7 @@ Takes environment variables and puts them into dictionaries.
     | CSUTIL_IBM_COS_ENDPOINT           | IBM_CONFIG['cos_endpoint']  |
 """
 
+from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
 import os
 
 from dotenv import load_dotenv
@@ -33,8 +34,10 @@ def __get_from_env(key, backup=None):
 
 DEFAULT_PLATFORM = SupportedPlatforms.IBM
 
-IBM_CONFIG = {
-    "api_key": __get_from_env("CSUTIL_IBM_API_KEY", backup="IBMCLOUD_API_KEY"),
-    "auth_endpoint": __get_from_env("CSUTIL_IBM_AUTH_ENDPOINT"),
-    "cos_endpoint": __get_from_env("CSUTIL_IBM_COS_ENDPOINT"),
+COS_CONFIG = {
+    SupportedPlatforms.IBM: IbmConfiguration(
+        auth_endpoint=__get_from_env("CSUTIL_IBM_AUTH_ENDPOINT"),
+        cos_endpoint=__get_from_env("CSUTIL_IBM_COS_ENDPOINT"),
+        api_key=__get_from_env("CSUTIL_IBM_API_KEY", backup="IBMCLOUD_API_KEY"),
+    )
 }
