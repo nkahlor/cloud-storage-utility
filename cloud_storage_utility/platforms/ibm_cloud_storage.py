@@ -1,5 +1,4 @@
 import base64
-from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
 import hashlib
 import logging
 import time
@@ -8,6 +7,7 @@ from typing import Dict
 import xmltodict
 
 from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
+from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
 
 from ..common.base_cloud_storage import BaseCloudStorage
 

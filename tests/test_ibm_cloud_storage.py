@@ -2,8 +2,8 @@ import aiohttp
 import pytest
 from aioresponses import aioresponses
 
-from cloud_storage_utility.platforms.ibm_cloud_storage import IbmCloudStorage
 from cloud_storage_utility.config.config import COS_CONFIG, SupportedPlatforms
+from cloud_storage_utility.platforms.ibm_cloud_storage import IbmCloudStorage
 
 config = COS_CONFIG[SupportedPlatforms.IBM]
 

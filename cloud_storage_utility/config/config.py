@@ -11,10 +11,11 @@ Takes environment variables and puts them into dictionaries.
     | CSUTIL_IBM_COS_ENDPOINT           | IBM_CONFIG['cos_endpoint']  |
 """
 
-from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
 import os
 
 from dotenv import load_dotenv
+
+from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
 
 load_dotenv()
 

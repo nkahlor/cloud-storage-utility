@@ -1,7 +1,6 @@
 """Routes cloud storage operations to underlying platform implementations."""
 
 import asyncio
-from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
 import os
 import sys
 from itertools import groupby
@@ -11,6 +10,7 @@ import aiohttp
 
 from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
 from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
+from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
 
 from .config import config
 from .platforms.ibm_cloud_storage import IbmCloudStorage
