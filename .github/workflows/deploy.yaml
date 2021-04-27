@@ -41,18 +41,6 @@ jobs:
           branch: docs # The branch the action should deploy to.
           folder: docs # The folder the action should deploy.
 
-      - name: Generate coverage report
-        if: "!github.event.release.prerelease"
-        run: pipenv run test-coverage
-
-      - name: Upload coverage to Codecov
-        if: "!github.event.release.prerelease"
-        uses: codecov/codecov-action@v1
-        with:
-          fail_ci_if_error: true
-          path_to_write_report: ./coverage/codecov_report.txt
-          verbose: true
-
       # No matter the type of release, send it here to test
       - name: Publish distribution 📦 to Test PyPI
         if: "github.event.release.prerelease"
