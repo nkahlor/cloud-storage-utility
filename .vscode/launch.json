@@ -14,7 +14,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/csutil",
-            "args": ["pull", "-p", "20200220/", "kronos-testdata-nicky", "./dat/pull_folder", "* "],
+            "args": ["pull", "-p", "20200120/", "kronos-testdata-nicky", "./dat/pull_folder", "datafile-4* "],
             "console": "integratedTerminal"
         },
         {
@@ -22,7 +22,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/csutil",
-            "args": ["list-remote", "-p", "20200220/", "kronos-testdata-nicky"],
+            "args": ["list-remote", "--prefix", "20200120/", "kronos-testdata-nicky", "datafile-4* "],
             "console": "integratedTerminal"
         },
         {

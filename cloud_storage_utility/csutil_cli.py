@@ -51,6 +51,15 @@ def __global_test_options(func):
     return func
 
 
+def __filter_cloud_keys(wildcard_patterns, cloud_keys, prefix):
+    filtered_keys = []
+    wildcard_patterns = [f"{prefix}{wildcard}" for wildcard in wildcard_patterns]
+    for wildcard in wildcard_patterns:
+        wildcard = wildcard.strip()
+        filtered_keys += fnmatch.filter(cloud_keys, wildcard)
+    return filtered_keys
+
+
 def run_async(func):
     """
     Allows you to run a click command asynchronously.
@@ -113,6 +122,7 @@ def execute_cli():
 # TODO: Allow filtering of these keys so we can search the contents of a bucket
 @execute_cli.command()
 @click.argument("bucket-name", type=click.STRING)
+@click.argument("cloud-key-wildcards", type=click.STRING, nargs=UNLIMITED_ARGS)
 @click.option(
     "-p",
     "--prefix",
@@ -124,13 +134,17 @@ def execute_cli():
     "-d", "--delimiter", type=click.STRING, help="Set the prefix delimiter", default="/"
 )
 @run_async
-async def list_remote(bucket_name, prefix, delimiter):
+async def list_remote(bucket_name, cloud_key_wildcards, prefix, delimiter):
     """List contents of cloud bucket."""
     async with FileBroker() as file_broker:
         keys = await file_broker.get_bucket_keys(bucket_name, prefix, delimiter)
         if len(keys) == 0:
             print(f"No Keys found matching the prefix {prefix} in {bucket_name}")
         else:
+            if len(cloud_key_wildcards) == 0:
+                cloud_key_wildcards = ["*"]
+
+            keys = __filter_cloud_keys(cloud_key_wildcards, keys, prefix)
             print(*keys, sep="\n")
 
 
@@ -142,7 +156,7 @@ async def list_remote(bucket_name, prefix, delimiter):
     "-p",
     "--prefix",
     type=click.STRING,
-    help="Only pull files with matching prefix",
+    help="Only push files with matching prefix",
     default="",
 )
 @run_async
@@ -209,12 +223,10 @@ async def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards, pr
     # Get the names of all the files in the bucket
     async with FileBroker() as file_broker:
         bucket_contents = await file_broker.get_bucket_keys(cloud_bucket, prefix)
-
         # Filter out the ones we need
-        keys_to_download = []
-        for wildcard in cloud_key_wildcards:
-            wildcard = wildcard.strip()
-            keys_to_download += fnmatch.filter(bucket_contents, wildcard)
+        keys_to_download = __filter_cloud_keys(
+            cloud_key_wildcards, bucket_contents, prefix
+        )
 
         if len(keys_to_download) > 0:
             pbar = tqdm(
@@ -241,24 +253,22 @@ async def pull(fail_fast, cloud_bucket, destination_dir, cloud_key_wildcards, pr
 
 @execute_cli.command()
 @click.argument("cloud-bucket", type=click.STRING)
-@click.argument("cloud-key-wildcard", type=click.STRING, nargs=UNLIMITED_ARGS)
+@click.argument("cloud-key-wildcards", type=click.STRING, nargs=UNLIMITED_ARGS)
 @click.option(
     "-p",
     "--prefix",
     type=click.STRING,
-    help="Only pull files with matching prefix",
+    help="Only delete files with matching prefix",
     default="",
 )
 @run_async
-async def delete(cloud_bucket, cloud_key_wildcard, prefix):
+async def delete(cloud_bucket, cloud_key_wildcards, prefix):
     """Delete files from the cloud bucket."""
     async with FileBroker() as file_broker:
         bucket_contents = await file_broker.get_bucket_keys(cloud_bucket, prefix)
-
-        keys_to_delete = []
-        for wildcard in cloud_key_wildcard:
-            wildcard = wildcard.strip()
-            keys_to_delete += fnmatch.filter(bucket_contents, wildcard)
+        keys_to_delete = __filter_cloud_keys(
+            cloud_key_wildcards, bucket_contents, prefix
+        )
 
         if len(keys_to_delete) > 0:
             pbar = tqdm(
