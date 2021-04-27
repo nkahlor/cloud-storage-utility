@@ -7,6 +7,13 @@
 
 A Python based cloud utility to help you transfer files to and from multiple cloud providers under one CLI/API.
 
+## Supported Cloud Platforms
+| Platform  | Implemented    |
+| :-------: | :------------- |
+| IBM Cloud | ✅              |
+|   Azure   | ❌ Coming Soon! |
+|    AWS    | ❌ Coming Soon! |
+
 ## Installation
 
 ```shell
@@ -20,25 +27,17 @@ pip install cloud-storage-utility
 To configure this application, you have to set a few environment variables.
 
 ```
-# You can use 'azure' or 'ibm'
+# Currently we only support 'ibm'
 CSUTIL_CLOUD_PLATFORM=
 
 # You only need to set these if you intend to use ibm
 CSUTIL_IBM_API_KEY=
 CSUTIL_IBM_AUTH_ENDPOINT=
 CSUTIL_IBM_COS_ENDPOINT=
-CSUTIL_IBM_CRN=
 
-# You only need to set these if you intend to use azure
-CSUTIL_AZURE_STORAGE_ACCOUNT_NAME=
-CSUTIL_AZURE_TENANT_ID=
-CSUTIL_AZURE_CLIENT_ID=
-CSUTIL_AZURE_CLIENT_SECRET=
-
-# set them all if you intend to use this tool for both platforms
+# If `CSUTIL_IBM_API_KEY` is undefined, we will attempt to use `IBMCLOUD_API_KEY` instead.
 ```
 
-By default, the CLI will attempt to use IBM
 
 #### CLI Commands
 
@@ -71,18 +70,27 @@ csutil push example-bucket/test_directory ./dat/tmp.txt ./dat/tmp2.txt
 Example usage
 
 ```python
+import asyncio
 from cloud_storage_utility.file_broker import FileBroker
 
-
-broker = FileBroker()
-
-broker.download_files(
-    bucket_name="test-bucket",
-    local_directory="./data",
-    file_names=["tmp.txt1", "tmp2.txt"],
+config = IbmConfiguration(
+    auth_endpoint="http://ibm-endpoint.com/auth",
+    cos_endpoint="https://ibm-endpoint.com/cos", 
+    api_key="<api-key>"
 )
-```
 
+async def main():
+    async with FileBroker(config) as file_broker:
+        file_broker.download_files(
+            bucket_name="test-bucket",
+            local_directory="./data",
+            file_names=["tmp.txt1", "tmp2.txt"],
+        )
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+Check out the [API docs](https://nkahlor.github.io/cloud-storage-utility/cloud_storage_utility.html) for many more detailed examples!
 ## Developing Locally
 
 We use `pipenv` to manage packages. If you don't already have it installed, make sure to install it via `pip install pipenv`.
@@ -98,3 +106,6 @@ pipenv install --dev --pre
 ```
 
 Now you're all set to start writing code!
+
+
+https://cloud.ibm.com/docs/cloud-object-storage?topic=cloud-object-storage-object-operations

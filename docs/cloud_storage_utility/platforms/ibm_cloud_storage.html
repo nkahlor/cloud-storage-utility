@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="pdoc 6.3.2" />
+    <meta name="generator" content="pdoc 6.4.4" />
     <title>cloud_storage_utility.platforms.ibm_cloud_storage API documentation</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2264%22%20height%3D%2264%22%20viewBox%3D%2244.5%202.5%2015%2015%22%3E%3Cpath%20d%3D%22M49.351%2021.041c-.233-.721-.546-2.408-.772-4.076-.042-.09-.067-.187-.046-.288-.166-1.347-.277-2.625-.241-3.351-1.378-1.008-2.271-2.586-2.271-4.362%200-.976.272-1.935.788-2.774.057-.094.122-.18.184-.268-.033-.167-.052-.339-.052-.516%200-1.477%201.202-2.679%202.679-2.679.791%200%201.496.352%201.987.9a6.3%206.3%200%200%201%201.001.029c.492-.564%201.207-.929%202.012-.929%201.477%200%202.679%201.202%202.679%202.679a2.65%202.65%200%200%201-.269%201.148c.383.747.595%201.572.595%202.41%200%202.311-1.507%204.29-3.635%205.107.037.699.147%202.27.423%203.294l.137.461c.156%202.136-4.612%205.166-5.199%203.215zm.127-4.919a4.78%204.78%200%200%200%20.775-.584c-.172-.115-.505-.254-.88-.378zm.331%202.302l.828-.502c-.202-.143-.576-.328-.984-.49zm.45%202.157l.701-.403c-.214-.115-.536-.249-.891-.376l.19.779zM49.13%204.141c0%20.152.123.276.276.276s.275-.124.275-.276-.123-.276-.276-.276-.275.124-.275.276zm.735-.389a1.15%201.15%200%200%201%20.314.783%201.16%201.16%200%200%201-1.162%201.162c-.457%200-.842-.27-1.032-.653-.026.117-.042.238-.042.362a1.68%201.68%200%200%200%201.679%201.679%201.68%201.68%200%200%200%201.679-1.679c0-.843-.626-1.535-1.436-1.654zm3.076%201.654a1.68%201.68%200%200%200%201.679%201.679%201.68%201.68%200%200%200%201.679-1.679c0-.037-.009-.072-.011-.109-.21.3-.541.508-.935.508a1.16%201.16%200%200%201-1.162-1.162%201.14%201.14%200%200%201%20.474-.912c-.015%200-.03-.005-.045-.005-.926.001-1.679.754-1.679%201.68zm1.861-1.265c0%20.152.123.276.276.276s.275-.124.275-.276-.123-.276-.276-.276-.275.124-.275.276zm1.823%204.823c0-.52-.103-1.035-.288-1.52-.466.394-1.06.64-1.717.64-1.144%200-2.116-.725-2.499-1.738-.383%201.012-1.355%201.738-2.499%201.738-.867%200-1.631-.421-2.121-1.062-.307.605-.478%201.267-.478%201.942%200%202.486%202.153%204.51%204.801%204.51s4.801-2.023%204.801-4.51zm-3.032%209.156l-.146-.492c-.276-1.02-.395-2.457-.444-3.268a6.11%206.11%200%200%201-1.18.115%206.01%206.01%200%200%201-2.536-.562l.006.175c.802.215%201.848.612%202.021%201.25.079.295-.021.601-.274.837l-.598.501c.667.304%201.243.698%201.311%201.179.02.144.022.507-.393.787l-.564.365c1.285.521%201.361.96%201.381%201.126.018.142.011.496-.427.746l-.854.489c.064-1.19%201.985-2.585%202.697-3.248zM49.34%209.925c0-.667%201-.667%201%200%200%20.653.818%201.205%201.787%201.205s1.787-.552%201.787-1.205c0-.667%201-.667%201%200%200%201.216-1.25%202.205-2.787%202.205s-2.787-.989-2.787-2.205zm-.887-7.633c-.093.077-.205.114-.317.114a.5.5%200%200%201-.318-.886L49.183.397a.5.5%200%200%201%20.703.068.5.5%200%200%201-.069.703zm7.661-.065c-.086%200-.173-.022-.253-.068l-1.523-.893c-.575-.337-.069-1.2.506-.863l1.523.892a.5.5%200%200%201%20.179.685c-.094.158-.261.247-.432.247z%22%20fill%3D%22%233bb300%22/%3E%3C/svg%3E"/>
 
@@ -69,12 +69,15 @@
                 
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+            <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
-<span class="kn">import</span> <span class="nn">ibm_boto3</span>
-<span class="kn">from</span> <span class="nn">ibm_boto3.s3.transfer</span> <span class="kn">import</span> <span class="n">TransferConfig</span>
-<span class="kn">from</span> <span class="nn">ibm_botocore.config</span> <span class="kn">import</span> <span class="n">Config</span>
-<span class="kn">from</span> <span class="nn">ibm_botocore.exceptions</span> <span class="kn">import</span> <span class="n">ClientError</span>
+<span class="kn">import</span> <span class="nn">xmltodict</span>
+
+<span class="kn">from</span> <span class="nn">cloud_storage_utility.types.bucket_key</span> <span class="kn">import</span> <span class="n">BucketKeyMetadata</span>
 
 <span class="kn">from</span> <span class="nn">..common.base_cloud_storage</span> <span class="kn">import</span> <span class="n">BaseCloudStorage</span>
 <span class="kn">from</span> <span class="nn">..config</span> <span class="kn">import</span> <span class="n">config</span>
@@ -83,48 +86,113 @@
 <span class="k">class</span> <span class="nc">IbmCloudStorage</span><span class="p">(</span><span class="n">BaseCloudStorage</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;File operation implementations for IBM platform.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__api_key</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;api_key&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cos_crn</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;crn&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__auth_endpoint</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;auth_endpoint&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;cos_endpoint&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__session</span> <span class="o">=</span> <span class="n">session</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__expires_at</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__access_token</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_resource</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__api_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cos_crn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__auth_endpoint</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;/&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">)</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-            <span class="c1"># I only want to return the keys</span>
-            <span class="n">return_array</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">files</span><span class="p">))</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+
+            <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">delimiter</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
+
+            <span class="n">all_items</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">is_truncated</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">continuation_token</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">while</span> <span class="n">is_truncated</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">continuation_token</span><span class="p">:</span>
+                    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;continuation-token&quot;</span><span class="p">:</span> <span class="n">continuation_token</span><span class="p">,</span>
+                        <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span>
+                        <span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">?list-type=2&quot;</span><span class="p">,</span>
+                    <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                    <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                    <span class="n">xml_response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+                    <span class="n">response_dict</span> <span class="o">=</span> <span class="n">xmltodict</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">xml_response</span><span class="p">)[</span><span class="s2">&quot;ListBucketResult&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="s2">&quot;Contents&quot;</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="s2">&quot;Key&quot;</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]:</span>
+                            <span class="n">item</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
+                            <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="p">{</span>
+                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
+                                    <span class="p">)</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="p">{</span>
+                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
+                                    <span class="p">)</span>
+                                <span class="p">}</span>
+                                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
+                            <span class="p">}</span>
+
+                        <span class="n">all_items</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+
+                    <span class="n">is_truncated</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;IsTruncated&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+                    <span class="k">if</span> <span class="n">is_truncated</span><span class="p">:</span>
+                        <span class="n">continuation_token</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;NextContinuationToken&quot;</span><span class="p">]</span>
+
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-            <span class="k">return</span> <span class="p">[]</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{}</span>
 
-        <span class="k">return</span> <span class="n">return_array</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">all_items</span><span class="p">)</span>
 
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">upload_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">upload_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bucket_name</span><span class="p">,</span>
+        <span class="n">cloud_key</span><span class="p">,</span>
+        <span class="n">file_path</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Note: This should only be used for files &lt; 500MB. When you need to upload larger files, you have to</span>
+<span class="sd">        implement multi-part uploads.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># the upload_fileobj method will automatically execute a multi-part upload</span>
-            <span class="c1"># in 5 MB chunks for all files over 15 MB</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_data</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">)</span><span class="o">.</span><span class="n">upload_fileobj</span><span class="p">(</span>
-                    <span class="n">Fileobj</span><span class="o">=</span><span class="n">file_data</span><span class="p">,</span>
-                    <span class="n">Config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_transfer_config</span><span class="p">(</span><span class="n">use_threads</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="p">)</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
 
+            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+                <span class="n">cloud_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_data</span><span class="p">:</span>
+                <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">file_data</span><span class="p">,</span>
+                    <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="k">pass</span>
             <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="n">ClientError</span> <span class="k">as</span> <span class="n">client_error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Client error: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">client_error</span><span class="p">))</span>
-            <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">fnf_error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;File not found on local machine: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fnf_error</span><span class="p">))</span>
-            <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unable to upload to bucket: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
             <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -136,13 +204,38 @@
                 <span class="p">)</span>
         <span class="k">return</span> <span class="n">upload_succeeded</span>
 
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">remove_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">delete_request</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">)</span><span class="o">.</span><span class="n">delete_objects</span><span class="p">(</span><span class="n">Delete</span><span class="o">=</span><span class="n">delete_request</span><span class="p">)</span>
-
-        <span class="n">file_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">],</span> <span class="n">delete_request</span><span class="p">[</span><span class="s2">&quot;Objects&quot;</span><span class="p">]))</span>
-
-        <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">callback</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">file_list</span><span class="p">,</span> <span class="n">file_list</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">remove_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">delete_request</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">removal_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">xml_body</span> <span class="o">=</span> <span class="n">xmltodict</span><span class="o">.</span><span class="n">unparse</span><span class="p">({</span><span class="s2">&quot;Delete&quot;</span><span class="p">:</span> <span class="n">delete_request</span><span class="p">})</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">md</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">xml_body</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+            <span class="n">contents_md5</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">md</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Content-MD5&quot;</span><span class="p">:</span> <span class="n">contents_md5</span><span class="p">,</span>
+                <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;text/plain; charset=utf-8&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">?delete=&quot;</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">xml_body</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                <span class="n">dict_response</span> <span class="o">=</span> <span class="n">xmltodict</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">())[</span><span class="s2">&quot;DeleteResult&quot;</span><span class="p">][</span>
+                    <span class="s2">&quot;Deleted&quot;</span>
+                <span class="p">]</span>
+                <span class="c1"># This is just dealing with a quirk in the xml parser, if only s3 used json like a normal person :(</span>
+                <span class="k">if</span> <span class="s2">&quot;Key&quot;</span> <span class="ow">in</span> <span class="n">dict_response</span><span class="p">:</span>
+                    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">dict_response</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">dict_response</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="n">removal_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">callback</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">file_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">removal_succeeded</span>
 
     <span class="c1"># Overriding the parent function because we can make it more efficient</span>
     <span class="k">def</span> <span class="nf">get_remove_items_coroutines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">item_names</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -160,15 +253,15 @@
                 <span class="c1"># every time the index is a mod of 1000, we know that&#39;s a</span>
                 <span class="c1"># complete request</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Objects&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
+                    <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Object&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
                     <span class="c1"># reset request list for the next iteration</span>
                     <span class="n">request</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="c1"># append whatever is left over</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">request</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Objects&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
+                <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Object&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">request</span> <span class="ow">in</span> <span class="n">delete_requests</span><span class="p">:</span>
             <span class="n">delete_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remove_item</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">callback</span><span class="p">))</span>
@@ -176,18 +269,29 @@
         <span class="k">return</span> <span class="n">delete_tasks</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">,</span> <span class="n">destination_filepath</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span>
-    <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bucket_name</span><span class="p">,</span>
+        <span class="n">cloud_key</span><span class="p">,</span>
+        <span class="n">destination_filepath</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">)</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span>
-                <span class="n">Filename</span><span class="o">=</span><span class="n">destination_filepath</span><span class="p">,</span>
-                <span class="n">Config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_transfer_config</span><span class="p">(</span><span class="n">use_threads</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+                <span class="n">cloud_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination_filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">downloaded_file</span><span class="p">:</span>
+                    <span class="n">downloaded_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
 
             <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
             <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -200,24 +304,22 @@
 
         <span class="k">return</span> <span class="n">download_succeeded</span>
 
-    <span class="k">def</span> <span class="nf">__get_transfer_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_threads</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="c1"># set the transfer threshold and chunk size</span>
-        <span class="k">return</span> <span class="n">TransferConfig</span><span class="p">(</span>
-            <span class="n">use_threads</span><span class="o">=</span><span class="n">use_threads</span><span class="p">,</span>
-            <span class="n">multipart_threshold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_threshold</span><span class="p">,</span>
-            <span class="n">multipart_chunksize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">part_size</span><span class="p">,</span>
-        <span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__get_auth_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">current_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">current_time</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__expires_at</span><span class="p">:</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/x-www-form-urlencoded&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;grant_type=urn%3Aibm%3Aparams%3Aoauth%3Agrant-type%3Aapikey&amp;apikey=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__api_key</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__auth_endpoint</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__expires_at</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;expiration&quot;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__access_token</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;access_token&quot;</span><span class="p">]</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__get_resource</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">cos_crn</span><span class="p">,</span> <span class="n">auth_endpoint</span><span class="p">,</span> <span class="n">cos_endpoint</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">ibm_boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span>
-            <span class="s2">&quot;s3&quot;</span><span class="p">,</span>
-            <span class="n">ibm_api_key_id</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span>
-            <span class="n">ibm_service_instance_id</span><span class="o">=</span><span class="n">cos_crn</span><span class="p">,</span>
-            <span class="n">ibm_auth_endpoint</span><span class="o">=</span><span class="n">auth_endpoint</span><span class="p">,</span>
-            <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">signature_version</span><span class="o">=</span><span class="s2">&quot;oauth&quot;</span><span class="p">),</span>
-            <span class="n">endpoint_url</span><span class="o">=</span><span class="n">cos_endpoint</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__access_token</span>
 </pre></div>
 
         </details>
@@ -237,48 +339,113 @@
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">IbmCloudStorage</span><span class="p">(</span><span class="n">BaseCloudStorage</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;File operation implementations for IBM platform.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__api_key</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;api_key&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cos_crn</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;crn&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__auth_endpoint</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;auth_endpoint&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;cos_endpoint&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__session</span> <span class="o">=</span> <span class="n">session</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__expires_at</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__access_token</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_resource</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__api_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cos_crn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__auth_endpoint</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;/&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">)</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-            <span class="c1"># I only want to return the keys</span>
-            <span class="n">return_array</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">files</span><span class="p">))</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+
+            <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">delimiter</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
+
+            <span class="n">all_items</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">is_truncated</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">continuation_token</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">while</span> <span class="n">is_truncated</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">continuation_token</span><span class="p">:</span>
+                    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;continuation-token&quot;</span><span class="p">:</span> <span class="n">continuation_token</span><span class="p">,</span>
+                        <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span>
+                        <span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">?list-type=2&quot;</span><span class="p">,</span>
+                    <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                    <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                    <span class="n">xml_response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+                    <span class="n">response_dict</span> <span class="o">=</span> <span class="n">xmltodict</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">xml_response</span><span class="p">)[</span><span class="s2">&quot;ListBucketResult&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="s2">&quot;Contents&quot;</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="s2">&quot;Key&quot;</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]:</span>
+                            <span class="n">item</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
+                            <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="p">{</span>
+                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
+                                    <span class="p">)</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="p">{</span>
+                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
+                                    <span class="p">)</span>
+                                <span class="p">}</span>
+                                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
+                            <span class="p">}</span>
+
+                        <span class="n">all_items</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+
+                    <span class="n">is_truncated</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;IsTruncated&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+                    <span class="k">if</span> <span class="n">is_truncated</span><span class="p">:</span>
+                        <span class="n">continuation_token</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;NextContinuationToken&quot;</span><span class="p">]</span>
+
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-            <span class="k">return</span> <span class="p">[]</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{}</span>
 
-        <span class="k">return</span> <span class="n">return_array</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">all_items</span><span class="p">)</span>
 
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">upload_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">upload_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bucket_name</span><span class="p">,</span>
+        <span class="n">cloud_key</span><span class="p">,</span>
+        <span class="n">file_path</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Note: This should only be used for files &lt; 500MB. When you need to upload larger files, you have to</span>
+<span class="sd">        implement multi-part uploads.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># the upload_fileobj method will automatically execute a multi-part upload</span>
-            <span class="c1"># in 5 MB chunks for all files over 15 MB</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_data</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">)</span><span class="o">.</span><span class="n">upload_fileobj</span><span class="p">(</span>
-                    <span class="n">Fileobj</span><span class="o">=</span><span class="n">file_data</span><span class="p">,</span>
-                    <span class="n">Config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_transfer_config</span><span class="p">(</span><span class="n">use_threads</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="p">)</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
 
+            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+                <span class="n">cloud_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_data</span><span class="p">:</span>
+                <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">file_data</span><span class="p">,</span>
+                    <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="k">pass</span>
             <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="n">ClientError</span> <span class="k">as</span> <span class="n">client_error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Client error: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">client_error</span><span class="p">))</span>
-            <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">fnf_error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;File not found on local machine: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fnf_error</span><span class="p">))</span>
-            <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unable to upload to bucket: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
             <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -290,13 +457,38 @@
                 <span class="p">)</span>
         <span class="k">return</span> <span class="n">upload_succeeded</span>
 
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">remove_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">delete_request</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">)</span><span class="o">.</span><span class="n">delete_objects</span><span class="p">(</span><span class="n">Delete</span><span class="o">=</span><span class="n">delete_request</span><span class="p">)</span>
-
-        <span class="n">file_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">],</span> <span class="n">delete_request</span><span class="p">[</span><span class="s2">&quot;Objects&quot;</span><span class="p">]))</span>
-
-        <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">callback</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">file_list</span><span class="p">,</span> <span class="n">file_list</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">remove_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">delete_request</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">removal_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">xml_body</span> <span class="o">=</span> <span class="n">xmltodict</span><span class="o">.</span><span class="n">unparse</span><span class="p">({</span><span class="s2">&quot;Delete&quot;</span><span class="p">:</span> <span class="n">delete_request</span><span class="p">})</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">md</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">xml_body</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+            <span class="n">contents_md5</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">md</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Content-MD5&quot;</span><span class="p">:</span> <span class="n">contents_md5</span><span class="p">,</span>
+                <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;text/plain; charset=utf-8&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">?delete=&quot;</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">xml_body</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                <span class="n">dict_response</span> <span class="o">=</span> <span class="n">xmltodict</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">())[</span><span class="s2">&quot;DeleteResult&quot;</span><span class="p">][</span>
+                    <span class="s2">&quot;Deleted&quot;</span>
+                <span class="p">]</span>
+                <span class="c1"># This is just dealing with a quirk in the xml parser, if only s3 used json like a normal person :(</span>
+                <span class="k">if</span> <span class="s2">&quot;Key&quot;</span> <span class="ow">in</span> <span class="n">dict_response</span><span class="p">:</span>
+                    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">dict_response</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">dict_response</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="n">removal_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">callback</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">file_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">removal_succeeded</span>
 
     <span class="c1"># Overriding the parent function because we can make it more efficient</span>
     <span class="k">def</span> <span class="nf">get_remove_items_coroutines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">item_names</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -314,15 +506,15 @@
                 <span class="c1"># every time the index is a mod of 1000, we know that&#39;s a</span>
                 <span class="c1"># complete request</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Objects&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
+                    <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Object&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
                     <span class="c1"># reset request list for the next iteration</span>
                     <span class="n">request</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="c1"># append whatever is left over</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">request</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Objects&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
+                <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Object&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">request</span> <span class="ow">in</span> <span class="n">delete_requests</span><span class="p">:</span>
             <span class="n">delete_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remove_item</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">callback</span><span class="p">))</span>
@@ -330,18 +522,29 @@
         <span class="k">return</span> <span class="n">delete_tasks</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">,</span> <span class="n">destination_filepath</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span>
-    <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bucket_name</span><span class="p">,</span>
+        <span class="n">cloud_key</span><span class="p">,</span>
+        <span class="n">destination_filepath</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">)</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span>
-                <span class="n">Filename</span><span class="o">=</span><span class="n">destination_filepath</span><span class="p">,</span>
-                <span class="n">Config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_transfer_config</span><span class="p">(</span><span class="n">use_threads</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+                <span class="n">cloud_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination_filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">downloaded_file</span><span class="p">:</span>
+                    <span class="n">downloaded_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
 
             <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
             <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -354,24 +557,22 @@
 
         <span class="k">return</span> <span class="n">download_succeeded</span>
 
-    <span class="k">def</span> <span class="nf">__get_transfer_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_threads</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="c1"># set the transfer threshold and chunk size</span>
-        <span class="k">return</span> <span class="n">TransferConfig</span><span class="p">(</span>
-            <span class="n">use_threads</span><span class="o">=</span><span class="n">use_threads</span><span class="p">,</span>
-            <span class="n">multipart_threshold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_threshold</span><span class="p">,</span>
-            <span class="n">multipart_chunksize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">part_size</span><span class="p">,</span>
-        <span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">__get_auth_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">current_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">current_time</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__expires_at</span><span class="p">:</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/x-www-form-urlencoded&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;grant_type=urn%3Aibm%3Aparams%3Aoauth%3Agrant-type%3Aapikey&amp;apikey=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__api_key</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__auth_endpoint</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__expires_at</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;expiration&quot;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__access_token</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;access_token&quot;</span><span class="p">]</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__get_resource</span><span class="p">(</span><span class="n">api_key</span><span class="p">,</span> <span class="n">cos_crn</span><span class="p">,</span> <span class="n">auth_endpoint</span><span class="p">,</span> <span class="n">cos_endpoint</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">ibm_boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span>
-            <span class="s2">&quot;s3&quot;</span><span class="p">,</span>
-            <span class="n">ibm_api_key_id</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span>
-            <span class="n">ibm_service_instance_id</span><span class="o">=</span><span class="n">cos_crn</span><span class="p">,</span>
-            <span class="n">ibm_auth_endpoint</span><span class="o">=</span><span class="n">auth_endpoint</span><span class="p">,</span>
-            <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">signature_version</span><span class="o">=</span><span class="s2">&quot;oauth&quot;</span><span class="p">),</span>
-            <span class="n">endpoint_url</span><span class="o">=</span><span class="n">cos_endpoint</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__access_token</span>
 </pre></div>
 
         </details>
@@ -384,20 +585,19 @@
                                         <div class="attr function"><a class="headerlink" href="#IbmCloudStorage.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">IbmCloudStorage</span><span class="signature">()</span>    </div>
+            <span class="name">IbmCloudStorage</span><span class="signature">(session)</span>
+    </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__api_key</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;api_key&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cos_crn</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;crn&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__auth_endpoint</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;auth_endpoint&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">IBM_CONFIG</span><span class="p">[</span><span class="s2">&quot;cos_endpoint&quot;</span><span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_resource</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__api_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cos_crn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__auth_endpoint</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__session</span> <span class="o">=</span> <span class="n">session</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__expires_at</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__access_token</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 </pre></div>
 
         </details>
@@ -418,22 +618,82 @@
                                         <div class="attr function"><a class="headerlink" href="#IbmCloudStorage.get_bucket_keys">#&nbsp;&nbsp</a>
 
         
-            <span class="def">def</span>
-            <span class="name">get_bucket_keys</span><span class="signature">(self, bucket_name)</span>:
+            <span class="def">async def</span>
+            <span class="name">get_bucket_keys</span><span class="signature">(
+    self,
+    bucket_name: str,
+    prefix: str = &#39;&#39;,
+    delimiter=&#39;/&#39;
+) -&gt; Dict[str, <a href="../types/bucket_key.html#BucketKeyMetadata">cloud_storage_utility.types.bucket_key.BucketKeyMetadata</a>]</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;/&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">)</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-            <span class="c1"># I only want to return the keys</span>
-            <span class="n">return_array</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">files</span><span class="p">))</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
-            <span class="k">return</span> <span class="p">[]</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
 
-        <span class="k">return</span> <span class="n">return_array</span>
+            <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">delimiter</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
+
+            <span class="n">all_items</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">is_truncated</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">continuation_token</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">while</span> <span class="n">is_truncated</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">continuation_token</span><span class="p">:</span>
+                    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;continuation-token&quot;</span><span class="p">:</span> <span class="n">continuation_token</span><span class="p">,</span>
+                        <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span>
+                        <span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">?list-type=2&quot;</span><span class="p">,</span>
+                    <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                    <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                    <span class="n">xml_response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+                    <span class="n">response_dict</span> <span class="o">=</span> <span class="n">xmltodict</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">xml_response</span><span class="p">)[</span><span class="s2">&quot;ListBucketResult&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="s2">&quot;Contents&quot;</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="s2">&quot;Key&quot;</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]:</span>
+                            <span class="n">item</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
+                            <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="p">{</span>
+                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
+                                    <span class="p">)</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="p">{</span>
+                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
+                                    <span class="p">)</span>
+                                <span class="p">}</span>
+                                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
+                            <span class="p">}</span>
+
+                        <span class="n">all_items</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+
+                    <span class="n">is_truncated</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;IsTruncated&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+                    <span class="k">if</span> <span class="n">is_truncated</span><span class="p">:</span>
+                        <span class="n">continuation_token</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;NextContinuationToken&quot;</span><span class="p">]</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">all_items</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -443,13 +703,30 @@
 <h6 id="args">Args</h6>
 
 <ul>
-<li><strong>bucket_name (str):</strong>  Target bucket</li>
+<li><strong>bucket_name (str):</strong>  Target bucket.</li>
+<li><strong>prefix (str, optional):</strong>  Only get keys that match this prefix.</li>
+<li><strong>delimiter (str, optional):</strong>  Set the delimiter, defaults to '/'. i.e, photos/image.jpeg</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
 
 <blockquote>
-  <p>List[str]: Keys within the bucket</p>
+  <p>Dict[str, BucketKeyMetadata]:
+      Dictionary of key name -> KeyMetadata, i.e.</p>
+</blockquote>
+
+<blockquote>
+<pre><code>{
+    "image.jpeg": {
+        "bytes": 32,
+        "last_modified": 1619195172
+    },
+    "file.txt": {
+        "bytes": 32,
+        "last_modified": 1619195172
+    }
+}
+</code></pre>
 </blockquote>
 </div>
 
@@ -460,31 +737,50 @@
 
         
             <span class="def">async def</span>
-            <span class="name">upload_file</span><span class="signature">(self, bucket_name, cloud_key, file_path, callback=None)</span>:
+            <span class="name">upload_file</span><span class="signature">(
+    self,
+    bucket_name,
+    cloud_key,
+    file_path,
+    prefix=&#39;&#39;,
+    callback=None
+) -&gt; bool</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">upload_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">upload_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bucket_name</span><span class="p">,</span>
+        <span class="n">cloud_key</span><span class="p">,</span>
+        <span class="n">file_path</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Note: This should only be used for files &lt; 500MB. When you need to upload larger files, you have to</span>
+<span class="sd">        implement multi-part uploads.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># the upload_fileobj method will automatically execute a multi-part upload</span>
-            <span class="c1"># in 5 MB chunks for all files over 15 MB</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_data</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">)</span><span class="o">.</span><span class="n">upload_fileobj</span><span class="p">(</span>
-                    <span class="n">Fileobj</span><span class="o">=</span><span class="n">file_data</span><span class="p">,</span>
-                    <span class="n">Config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_transfer_config</span><span class="p">(</span><span class="n">use_threads</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-                <span class="p">)</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
 
+            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+                <span class="n">cloud_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_data</span><span class="p">:</span>
+                <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">file_data</span><span class="p">,</span>
+                    <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="k">pass</span>
             <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="n">ClientError</span> <span class="k">as</span> <span class="n">client_error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Client error: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">client_error</span><span class="p">))</span>
-            <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">fnf_error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;File not found on local machine: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fnf_error</span><span class="p">))</span>
-            <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unable to upload to bucket: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
             <span class="n">upload_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -499,16 +795,8 @@
 
         </details>
 
-            <div class="docstring"><p>An implementation fo this must provide a way to upload a single file.</p>
-
-<h6 id="args">Args</h6>
-
-<ul>
-<li><strong>bucket_name (str):</strong>  Target bucket.</li>
-<li><strong>cloud_key (str):</strong>  What to name the file in the cloud.</li>
-<li><strong>file_path (str):</strong>  Where to get the file from locally.</li>
-<li><strong>callback (function, optional):</strong>  Implementations of this method need to call this after the operation is complete. Defaults to None.</li>
-</ul>
+            <div class="docstring"><p>Note: This should only be used for files &lt; 500MB. When you need to upload larger files, you have to
+implement multi-part uploads.</p>
 </div>
 
 
@@ -518,18 +806,43 @@
 
         
             <span class="def">async def</span>
-            <span class="name">remove_item</span><span class="signature">(self, bucket_name, delete_request, callback=None)</span>:
+            <span class="name">remove_item</span><span class="signature">(self, bucket_name, delete_request, callback=None) -&gt; bool</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">remove_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">delete_request</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">)</span><span class="o">.</span><span class="n">delete_objects</span><span class="p">(</span><span class="n">Delete</span><span class="o">=</span><span class="n">delete_request</span><span class="p">)</span>
-
-        <span class="n">file_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">],</span> <span class="n">delete_request</span><span class="p">[</span><span class="s2">&quot;Objects&quot;</span><span class="p">]))</span>
-
-        <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">callback</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">file_list</span><span class="p">,</span> <span class="n">file_list</span><span class="p">)</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">remove_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">delete_request</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">removal_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">xml_body</span> <span class="o">=</span> <span class="n">xmltodict</span><span class="o">.</span><span class="n">unparse</span><span class="p">({</span><span class="s2">&quot;Delete&quot;</span><span class="p">:</span> <span class="n">delete_request</span><span class="p">})</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">md</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">xml_body</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+            <span class="n">contents_md5</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">md</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Content-MD5&quot;</span><span class="p">:</span> <span class="n">contents_md5</span><span class="p">,</span>
+                <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;text/plain; charset=utf-8&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">?delete=&quot;</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">xml_body</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                <span class="n">dict_response</span> <span class="o">=</span> <span class="n">xmltodict</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">())[</span><span class="s2">&quot;DeleteResult&quot;</span><span class="p">][</span>
+                    <span class="s2">&quot;Deleted&quot;</span>
+                <span class="p">]</span>
+                <span class="c1"># This is just dealing with a quirk in the xml parser, if only s3 used json like a normal person :(</span>
+                <span class="k">if</span> <span class="s2">&quot;Key&quot;</span> <span class="ow">in</span> <span class="n">dict_response</span><span class="p">:</span>
+                    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">dict_response</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">dict_response</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="n">removal_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">callback</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">file_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">removal_succeeded</span>
 </pre></div>
 
         </details>
@@ -543,6 +856,13 @@
 <li><strong>cloud_key (str):</strong>  The name of the key we want to remove.</li>
 <li><strong>callback (Callable[[str, str, str], None], optional):</strong>  Implementations of this method need to call this after the operation is complete. Defaults to None.</li>
 </ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>bool:
+      Whether the remove was successful or not.</p>
+</blockquote>
 </div>
 
 
@@ -572,15 +892,15 @@
                 <span class="c1"># every time the index is a mod of 1000, we know that&#39;s a</span>
                 <span class="c1"># complete request</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Objects&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
+                    <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Object&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
                     <span class="c1"># reset request list for the next iteration</span>
                     <span class="n">request</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="c1"># append whatever is left over</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">request</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Objects&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
+                <span class="n">delete_requests</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;Object&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">})</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">request</span> <span class="ow">in</span> <span class="n">delete_requests</span><span class="p">:</span>
             <span class="n">delete_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">remove_item</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">callback</span><span class="p">))</span>
@@ -615,24 +935,42 @@
 
         
             <span class="def">async def</span>
-            <span class="name">download_file</span><span class="signature">(self, bucket_name, cloud_key, destination_filepath, callback=None)</span>:
+            <span class="name">download_file</span><span class="signature">(
+    self,
+    bucket_name,
+    cloud_key,
+    destination_filepath,
+    prefix: str = &#39;&#39;,
+    callback=None
+) -&gt; bool</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">download_file</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">,</span> <span class="n">destination_filepath</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span>
-    <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bucket_name</span><span class="p">,</span>
+        <span class="n">cloud_key</span><span class="p">,</span>
+        <span class="n">destination_filepath</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__cos</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key</span><span class="p">)</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span>
-                <span class="n">Filename</span><span class="o">=</span><span class="n">destination_filepath</span><span class="p">,</span>
-                <span class="n">Config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_transfer_config</span><span class="p">(</span><span class="n">use_threads</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+                <span class="n">cloud_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination_filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">downloaded_file</span><span class="p">:</span>
+                    <span class="n">downloaded_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
 
             <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
             <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -656,8 +994,16 @@
 <li><strong>bucket_name (str):</strong>  Target bucket.</li>
 <li><strong>cloud_key (str):</strong>  The name of the item we want to download from the cloud bucket.</li>
 <li><strong>destination_filepath (str):</strong>  Where to put the downloaded item.</li>
+<li><strong>prefix (str, optional):</strong>  Only download files under the matching prefix.</li>
 <li><strong>callback (Callable[[str, str, str, bool], None], optional):</strong>  Implementations of this method need to call this after the operation is complete. Defaults to None.</li>
 </ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>bool:
+      Whether the download was successful or not.</p>
+</blockquote>
 </div>
 
 

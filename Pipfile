@@ -15,18 +15,14 @@ documentation = "pdoc -o docs -d google ./cloud_storage_utility"
 [packages]
 click = "*"
 python-dotenv = "*"
-ibm-cos-sdk = "*"
-adal = "*"
-azure-mgmt-datalake-analytics = "*"
-azure-storage-file-datalake = "*"
-azure-datalake-store = "*"
-azure-identity = "*"
 tqdm = "*"
 colorama = "*"
+aiohttp = "*"
+xmltodict = "*"
+setuptools-scm = "*"
 
 [dev-packages]
 setuptools = "*"
-setuptools-scm = "*"
 wheel = "*"
 twine = "*"
 flake8 = "*"
@@ -40,6 +36,7 @@ mypy = "*"
 pdoc = "*"
 tox = "*"
 tox-pipenv = "*"
+aioresponses = "*"
 
 [pipenv]
 allow_prereleases = true

@@ -1,59 +1,127 @@
+import base64
+import hashlib
 import logging
+import time
+from typing import Dict
 
-import ibm_boto3
-from ibm_boto3.s3.transfer import TransferConfig
-from ibm_botocore.config import Config
-from ibm_botocore.exceptions import ClientError
+import xmltodict
+
+from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
+from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
 
 from ..common.base_cloud_storage import BaseCloudStorage
-from ..config import config
 
 
 class IbmCloudStorage(BaseCloudStorage):
     """File operation implementations for IBM platform."""
 
-    def __init__(self):
+    def __init__(self, session, ibm_config: IbmConfiguration):
         super().__init__()
-        self.__api_key = config.IBM_CONFIG["api_key"]
-        self.__cos_crn = config.IBM_CONFIG["crn"]
-        self.__auth_endpoint = config.IBM_CONFIG["auth_endpoint"]
-        self.__cos_endpoint = config.IBM_CONFIG["cos_endpoint"]
+        self.__api_key = ibm_config.api_key
+        self.__auth_endpoint = ibm_config.auth_endpoint
+        self.__cos_endpoint = ibm_config.cos_endpoint
+        self.__session = session
+        self.__expires_at = -1
+        self.__access_token = ""
 
-        self.__cos = self.__get_resource(
-            self.__api_key, self.__cos_crn, self.__auth_endpoint, self.__cos_endpoint
-        )
-
-    def get_bucket_keys(self, bucket_name):
+    async def get_bucket_keys(
+        self, bucket_name: str, prefix: str = "", delimiter="/"
+    ) -> Dict[str, BucketKeyMetadata]:
         try:
-            files = self.__cos.Bucket(bucket_name).objects.all()
-            # I only want to return the keys
-            return_array = list(map(lambda x: x.key, files))
+            access_token = await self.__get_auth_token()
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+            }
+
+            params: Dict[str, str] = {}
+            if prefix and prefix != "":
+                params = {"prefix": prefix.strip(), **params}
+                if delimiter:
+                    params = {"delimiter": delimiter, **params}
+
+            all_items = {}
+            is_truncated = True
+            continuation_token = None
+            while is_truncated:
+                if continuation_token:
+                    params = {
+                        "continuation-token": continuation_token,
+                        "prefix": prefix,
+                        "delimiter": delimiter,
+                    }
+                async with self.__session.get(
+                    f"{self.__cos_endpoint}/{bucket_name}?list-type=2",
+                    params=params,
+                    headers=headers,
+                ) as response:
+                    xml_response = await response.text()
+                    response_dict = xmltodict.parse(xml_response)["ListBucketResult"]
+                    if "Contents" in response_dict:
+                        if "Key" in response_dict["Contents"]:
+                            item = response_dict["Contents"]
+                            items = {
+                                item["Key"]: {
+                                    BucketKeyMetadata(
+                                        last_modified=item["LastModified"],
+                                        bytes=item["Size"],
+                                    )
+                                }
+                            }
+                        else:
+                            items = {
+                                item["Key"]: {
+                                    BucketKeyMetadata(
+                                        last_modified=item["LastModified"],
+                                        bytes=item["Size"],
+                                    )
+                                }
+                                for item in response_dict["Contents"]
+                            }
+
+                        all_items.update(items)
+
+                    is_truncated = response_dict["IsTruncated"] == "true"
+                    if is_truncated:
+                        continuation_token = response_dict["NextContinuationToken"]
+
         except Exception as error:
-            logging.error(error)
-            return []
+            logging.exception(error)
+            return {}
 
-        return return_array
+        return dict(all_items)
 
-    async def upload_file(self, bucket_name, cloud_key, file_path, callback=None):
+    async def upload_file(
+        self,
+        bucket_name,
+        cloud_key,
+        file_path,
+        prefix="",
+        callback=None,
+    ) -> bool:
+        """
+        Note: This should only be used for files < 500MB. When you need to upload larger files, you have to
+        implement multi-part uploads.
+        """
         upload_succeeded = None
         try:
-            # the upload_fileobj method will automatically execute a multi-part upload
-            # in 5 MB chunks for all files over 15 MB
-            with open(file_path, "rb") as file_data:
-                self.__cos.Object(bucket_name, cloud_key).upload_fileobj(
-                    Fileobj=file_data,
-                    Config=self.__get_transfer_config(use_threads=True),
-                )
+            access_token = await self.__get_auth_token()
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+            }
 
+            if prefix:
+                cloud_key = f"{prefix}{cloud_key}"
+
+            with open(file_path, "rb") as file_data:
+                async with self.__session.put(
+                    f"{self.__cos_endpoint}/{bucket_name}/{cloud_key}",
+                    data=file_data,
+                    headers=headers,
+                ):
+                    pass
             upload_succeeded = True
-        except ClientError as client_error:
-            logging.error("Client error: {0}".format(client_error))
-            upload_succeeded = False
-        except FileNotFoundError as fnf_error:
-            logging.error("File not found on local machine: {0}".format(fnf_error))
-            upload_succeeded = False
         except Exception as error:
-            logging.error("Unable to upload to bucket: {0}".format(error))
+            logging.exception(error)
             upload_succeeded = False
         finally:
             if callback is not None:
@@ -65,13 +133,38 @@ class IbmCloudStorage(BaseCloudStorage):
                 )
         return upload_succeeded
 
-    async def remove_item(self, bucket_name, delete_request, callback=None):
-        self.__cos.Bucket(bucket_name).delete_objects(Delete=delete_request)
-
-        file_list = list(map(lambda x: x["Key"], delete_request["Objects"]))
-
-        if callback is not None:
-            callback(bucket_name, file_list, file_list)
+    async def remove_item(self, bucket_name, delete_request, callback=None) -> bool:
+        removal_succeeded = True
+        try:
+            xml_body = xmltodict.unparse({"Delete": delete_request})
+            access_token = await self.__get_auth_token()
+            md = hashlib.md5(xml_body.encode("utf-8")).digest()
+            contents_md5 = base64.b64encode(md).decode("utf-8")
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-MD5": contents_md5,
+                "Content-Type": "text/plain; charset=utf-8",
+            }
+            async with self.__session.post(
+                f"{self.__cos_endpoint}/{bucket_name}?delete=",
+                headers=headers,
+                data=xml_body,
+            ) as response:
+                dict_response = xmltodict.parse(await response.text())["DeleteResult"][
+                    "Deleted"
+                ]
+                # This is just dealing with a quirk in the xml parser, if only s3 used json like a normal person :(
+                if "Key" in dict_response:
+                    file_list = [dict_response["Key"]]
+                else:
+                    file_list = [elem["Key"] for elem in dict_response]
+        except Exception as error:
+            logging.exception(error)
+            removal_succeeded = False
+        finally:
+            if callback is not None:
+                callback(bucket_name, file_list)
+        return removal_succeeded
 
     # Overriding the parent function because we can make it more efficient
     def get_remove_items_coroutines(self, bucket_name, item_names, callback=None):
@@ -89,15 +182,15 @@ class IbmCloudStorage(BaseCloudStorage):
                 # every time the index is a mod of 1000, we know that's a
                 # complete request
                 if (i + 1) % 1000 == 0:
-                    delete_requests.append({"Objects": request})
+                    delete_requests.append({"Object": request})
                     # reset request list for the next iteration
                     request = []
             # append whatever is left over
             if len(request) > 0:
-                delete_requests.append({"Objects": request})
+                delete_requests.append({"Object": request})
 
         except Exception as error:
-            logging.error(error)
+            logging.exception(error)
 
         for request in delete_requests:
             delete_tasks.append(self.remove_item(bucket_name, request, callback))
@@ -105,18 +198,29 @@ class IbmCloudStorage(BaseCloudStorage):
         return delete_tasks
 
     async def download_file(
-        self, bucket_name, cloud_key, destination_filepath, callback=None
-    ):
+        self,
+        bucket_name,
+        cloud_key,
+        destination_filepath,
+        prefix: str = "",
+        callback=None,
+    ) -> bool:
         download_succeeded = None
         try:
-            self.__cos.Object(bucket_name, cloud_key).download_file(
-                Filename=destination_filepath,
-                Config=self.__get_transfer_config(use_threads=True),
-            )
+            if prefix:
+                cloud_key = f"{prefix}{cloud_key}"
+            access_token = await self.__get_auth_token()
+            headers = {"Authorization": f"Bearer {access_token}"}
+            async with self.__session.get(
+                f"{self.__cos_endpoint}/{bucket_name}/{cloud_key}",
+                headers=headers,
+            ) as response:
+                with open(destination_filepath, "w") as downloaded_file:
+                    downloaded_file.write(await response.text())
 
             download_succeeded = True
         except Exception as error:
-            logging.error(error)
+            logging.exception(error)
             download_succeeded = False
         finally:
             if callback is not None:
@@ -129,21 +233,19 @@ class IbmCloudStorage(BaseCloudStorage):
 
         return download_succeeded
 
-    def __get_transfer_config(self, use_threads=True):
-        # set the transfer threshold and chunk size
-        return TransferConfig(
-            use_threads=use_threads,
-            multipart_threshold=self.file_threshold,
-            multipart_chunksize=self.part_size,
-        )
+    async def __get_auth_token(self):
+        current_time = int(time.time())
+        if current_time >= self.__expires_at:
+            headers = {
+                "content-type": "application/x-www-form-urlencoded",
+                "accept": "application/json",
+            }
+            data = f"grant_type=urn%3Aibm%3Aparams%3Aoauth%3Agrant-type%3Aapikey&apikey={self.__api_key}"
+            async with self.__session.post(
+                self.__auth_endpoint, headers=headers, data=data
+            ) as response:
+                response = await response.json()
+                self.__expires_at = response["expiration"]
+                self.__access_token = response["access_token"]
 
-    @staticmethod
-    def __get_resource(api_key, cos_crn, auth_endpoint, cos_endpoint):
-        return ibm_boto3.resource(
-            "s3",
-            ibm_api_key_id=api_key,
-            ibm_service_instance_id=cos_crn,
-            ibm_auth_endpoint=auth_endpoint,
-            config=Config(signature_version="oauth"),
-            endpoint_url=cos_endpoint,
-        )
+        return self.__access_token
