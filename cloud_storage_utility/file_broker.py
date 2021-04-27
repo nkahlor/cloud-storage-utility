@@ -26,7 +26,7 @@ class FileBroker:
 
     The ideal way is to use `async with` syntax, don't forget to use the `async` keyword, it's important!
     ```
-    async with FileBroker() as file_broker:
+    async with FileBroker(config) as file_broker:
         file_broker.upload_files(...)
     ```
 
