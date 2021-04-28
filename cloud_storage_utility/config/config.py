@@ -15,13 +15,13 @@ import os
 
 from dotenv import load_dotenv
 
-from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
+from ..types.ibm_configuration import IbmConfiguration
 
 load_dotenv()
 
 
 class SupportedPlatforms:
-    """ Lists all supported cloud platforms """
+    """Lists all supported cloud platforms"""
 
     IBM = "ibm"
 

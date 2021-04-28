@@ -2,9 +2,9 @@ import abc
 import os
 from typing import Any, Callable, Coroutine, Dict, List
 
-from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
-from cloud_storage_utility.common.util import strip_prefix
-from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
+from ..common.cloud_local_map import CloudLocalMap
+from ..common.util import strip_prefix
+from ..types.bucket_key import BucketKeyMetadata
 
 # 5 MB chunks
 DEFAULT_PART_SIZE = 1024 * 1024 * 5

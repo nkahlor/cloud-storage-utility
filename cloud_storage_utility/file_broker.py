@@ -8,9 +8,9 @@ from typing import Callable, Dict, List, Union
 
 import aiohttp
 
-from cloud_storage_utility.common.cloud_local_map import CloudLocalMap
-from cloud_storage_utility.types.bucket_key import BucketKeyMetadata
-from cloud_storage_utility.types.ibm_configuration import IbmConfiguration
+from .common.cloud_local_map import CloudLocalMap
+from .types.bucket_key import BucketKeyMetadata
+from .types.ibm_configuration import IbmConfiguration
 
 from .config import config
 from .platforms.ibm_cloud_storage import IbmCloudStorage
@@ -72,11 +72,11 @@ class FileBroker:
         return aiohttp.ClientSession()
 
     async def open(self):
-        """ Open an aiohttp session """
+        """Open an aiohttp session"""
         return await self.__aenter__()
 
     async def close(self):
-        """ Close the aiohttp session """
+        """Close the aiohttp session"""
         await self.__aexit__(*sys.exc_info())
 
     async def get_bucket_keys(
