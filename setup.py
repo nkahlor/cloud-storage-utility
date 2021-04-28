@@ -11,7 +11,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/AAInternal/cloud-storage-utility",
-    packages=["cloud_storage_utility"],
+    packages=setuptools.find_packages(
+        exclude=["*.tests", "*.tests.*", "tests.*", "tests"]
+    ),
     scripts=["scripts/csutil"],
     classifiers=[
         "Programming Language :: Python :: 3",
