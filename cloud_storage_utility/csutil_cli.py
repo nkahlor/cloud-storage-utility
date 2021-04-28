@@ -13,7 +13,7 @@ from colorama import Fore, Style, init
 from setuptools_scm import get_version
 from tqdm import tqdm
 
-from cloud_storage_utility.config.config import COS_CONFIG, DEFAULT_PLATFORM
+from .config.config import COS_CONFIG, DEFAULT_PLATFORM
 
 from .common.cloud_local_map import CloudLocalMap
 from .file_broker import FileBroker
