@@ -1,4 +1,4 @@
-"""Change"""
+"""Root module for csutil CLI."""
 import asyncio
 import fnmatch
 import glob
