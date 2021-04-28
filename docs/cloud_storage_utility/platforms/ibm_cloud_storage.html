@@ -95,7 +95,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__access_token</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;/&quot;</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
@@ -106,8 +106,6 @@
             <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">if</span> <span class="n">prefix</span> <span class="ow">and</span> <span class="n">prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                 <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
-                <span class="k">if</span> <span class="n">delimiter</span><span class="p">:</span>
-                    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
 
             <span class="n">all_items</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">is_truncated</span> <span class="o">=</span> <span class="kc">True</span>
@@ -117,7 +115,6 @@
                     <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
                         <span class="s2">&quot;continuation-token&quot;</span><span class="p">:</span> <span class="n">continuation_token</span><span class="p">,</span>
                         <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span>
-                        <span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span>
                     <span class="p">}</span>
                 <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">?list-type=2&quot;</span><span class="p">,</span>
@@ -277,16 +274,14 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
-                <span class="n">cloud_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
             <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
             <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
             <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination_filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">downloaded_file</span><span class="p">:</span>
-                    <span class="n">downloaded_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination_filepath</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">downloaded_file</span><span class="p">:</span>
+                    <span class="n">downloaded_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
             <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
@@ -348,7 +343,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__access_token</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;/&quot;</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
@@ -359,8 +354,6 @@
             <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">if</span> <span class="n">prefix</span> <span class="ow">and</span> <span class="n">prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                 <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
-                <span class="k">if</span> <span class="n">delimiter</span><span class="p">:</span>
-                    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
 
             <span class="n">all_items</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">is_truncated</span> <span class="o">=</span> <span class="kc">True</span>
@@ -370,7 +363,6 @@
                     <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
                         <span class="s2">&quot;continuation-token&quot;</span><span class="p">:</span> <span class="n">continuation_token</span><span class="p">,</span>
                         <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span>
-                        <span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span>
                     <span class="p">}</span>
                 <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">?list-type=2&quot;</span><span class="p">,</span>
@@ -530,16 +522,14 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
-                <span class="n">cloud_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
             <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
             <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
             <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination_filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">downloaded_file</span><span class="p">:</span>
-                    <span class="n">downloaded_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination_filepath</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">downloaded_file</span><span class="p">:</span>
+                    <span class="n">downloaded_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
             <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
@@ -624,15 +614,14 @@
             <span class="name">get_bucket_keys</span><span class="signature">(
     self,
     bucket_name: str,
-    prefix: str = &#39;&#39;,
-    delimiter=&#39;/&#39;
+    prefix: str = &#39;&#39;
 ) -&gt; Dict[str, <a href="../types/bucket_key.html#BucketKeyMetadata">cloud_storage_utility.types.bucket_key.BucketKeyMetadata</a>]</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;/&quot;</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
@@ -643,8 +632,6 @@
             <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">if</span> <span class="n">prefix</span> <span class="ow">and</span> <span class="n">prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                 <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
-                <span class="k">if</span> <span class="n">delimiter</span><span class="p">:</span>
-                    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">}</span>
 
             <span class="n">all_items</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="n">is_truncated</span> <span class="o">=</span> <span class="kc">True</span>
@@ -654,7 +641,6 @@
                     <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
                         <span class="s2">&quot;continuation-token&quot;</span><span class="p">:</span> <span class="n">continuation_token</span><span class="p">,</span>
                         <span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span>
-                        <span class="s2">&quot;delimiter&quot;</span><span class="p">:</span> <span class="n">delimiter</span><span class="p">,</span>
                     <span class="p">}</span>
                 <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">?list-type=2&quot;</span><span class="p">,</span>
@@ -707,7 +693,6 @@
 <ul>
 <li><strong>bucket_name (str):</strong>  Target bucket.</li>
 <li><strong>prefix (str, optional):</strong>  Only get keys that match this prefix.</li>
-<li><strong>delimiter (str, optional):</strong>  Set the delimiter, defaults to '/'. i.e, photos/image.jpeg</li>
 </ul>
 
 <h6 id="returns">Returns</h6>
@@ -959,16 +944,14 @@ implement multi-part uploads.</p>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
-                <span class="n">cloud_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">access_token</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_auth_token</span><span class="p">()</span>
             <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">access_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
             <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__cos_endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cloud_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
             <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination_filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">downloaded_file</span><span class="p">:</span>
-                    <span class="n">downloaded_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination_filepath</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">downloaded_file</span><span class="p">:</span>
+                    <span class="n">downloaded_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
             <span class="n">download_succeeded</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>

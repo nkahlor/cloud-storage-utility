@@ -39,7 +39,7 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     async def get_bucket_keys(
-        self, bucket_name: str, prefix: str = "", delimiter: str = "/"
+        self, bucket_name: str, prefix: str = ""
     ) -> Dict[str, BucketKeyMetadata]:
         """An implementation of this must provide a way to list the contents of a bucket.
 
@@ -48,8 +48,6 @@ class BaseCloudStorage(metaclass=abc.ABCMeta):
                 Target bucket.
             prefix (str, optional):
                 Only get keys that match this prefix.
-            delimiter (str, optional):
-                Set the delimiter, defaults to '/'. i.e, photos/image.jpeg
 
         Returns:
             Dict[str, BucketKeyMetadata]:

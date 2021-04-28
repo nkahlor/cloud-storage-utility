@@ -108,8 +108,11 @@
     <span class="k">return</span> <span class="n">func</span>
 
 
+<span class="c1"># TODO: Support other delimiters when the need arises</span>
 <span class="k">def</span> <span class="nf">__filter_cloud_keys</span><span class="p">(</span><span class="n">wildcard_patterns</span><span class="p">,</span> <span class="n">cloud_keys</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
     <span class="n">filtered_keys</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot;*/&quot;</span>
     <span class="n">wildcard_patterns</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">wildcard</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">wildcard</span> <span class="ow">in</span> <span class="n">wildcard_patterns</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">wildcard</span> <span class="ow">in</span> <span class="n">wildcard_patterns</span><span class="p">:</span>
         <span class="n">wildcard</span> <span class="o">=</span> <span class="n">wildcard</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -186,14 +189,11 @@
     <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Prefix to prepend the filename with in the cloud&quot;</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="s2">&quot;--delimiter&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set the prefix delimiter&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;/&quot;</span>
-<span class="p">)</span>
 <span class="nd">@run_async</span>
-<span class="k">async</span> <span class="k">def</span> <span class="nf">list_remote</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key_wildcards</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">list_remote</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key_wildcards</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;List contents of cloud bucket.&quot;&quot;&quot;</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="k">await</span> <span class="n">file_broker</span><span class="o">.</span><span class="n">get_bucket_keys</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="k">await</span> <span class="n">file_broker</span><span class="o">.</span><span class="n">get_bucket_keys</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No Keys found matching the prefix </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
