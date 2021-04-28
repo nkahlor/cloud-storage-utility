@@ -118,7 +118,7 @@ def __update_pbar_remove(pbar, files_deleted):
 @click.group()
 @click.version_option(__version__)
 def execute_cli():
-    """Create a cli group in click."""
+    """Interact with cloud storage from multiple cloud providers all through one CLI!"""
     pass
 
 
