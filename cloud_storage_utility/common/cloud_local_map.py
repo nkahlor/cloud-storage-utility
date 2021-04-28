@@ -1,5 +1,5 @@
 class CloudLocalMap:
-    """ Maps a local filepath to a remote cloud key """
+    """Maps a local filepath to a remote cloud key"""
 
     def __init__(self, cloud_key: str, local_filepath: str):
         """Creates an association between a remote cloud key, and a local filepath.

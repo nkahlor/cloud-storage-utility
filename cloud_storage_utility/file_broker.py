@@ -9,11 +9,10 @@ from typing import Callable, Dict, List, Union
 import aiohttp
 
 from .common.cloud_local_map import CloudLocalMap
-from .types.bucket_key import BucketKeyMetadata
-from .types.ibm_configuration import IbmConfiguration
-
 from .config import config
 from .platforms.ibm_cloud_storage import IbmCloudStorage
+from .types.bucket_key import BucketKeyMetadata
+from .types.ibm_configuration import IbmConfiguration
 
 
 class FileBroker:

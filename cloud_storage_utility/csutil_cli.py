@@ -13,9 +13,9 @@ from colorama import Fore, Style, init
 from setuptools_scm import get_version
 from tqdm import tqdm
 
-from .config.config import COS_CONFIG, DEFAULT_PLATFORM
-
 from .common.cloud_local_map import CloudLocalMap
+from .common.util import run
+from .config.config import COS_CONFIG, DEFAULT_PLATFORM
 from .file_broker import FileBroker
 
 UNLIMITED_ARGS = -1
@@ -70,7 +70,7 @@ def run_async(func):
     func = asyncio.coroutine(func)
 
     def inner_handler(*args, **kwargs):
-        asyncio.run(func(*args, **kwargs))
+        run(func(*args, **kwargs))
 
     return update_wrapper(inner_handler, func)
 

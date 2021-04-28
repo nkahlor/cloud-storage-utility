@@ -6,10 +6,9 @@ from typing import Dict
 
 import xmltodict
 
+from ..common.base_cloud_storage import BaseCloudStorage
 from ..types.bucket_key import BucketKeyMetadata
 from ..types.ibm_configuration import IbmConfiguration
-
-from ..common.base_cloud_storage import BaseCloudStorage
 
 
 class IbmCloudStorage(BaseCloudStorage):
