@@ -83,16 +83,15 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">groupby</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">aiohttp</span>
 
-<span class="kn">from</span> <span class="nn">cloud_storage_utility.common.cloud_local_map</span> <span class="kn">import</span> <span class="n">CloudLocalMap</span>
-<span class="kn">from</span> <span class="nn">cloud_storage_utility.types.bucket_key</span> <span class="kn">import</span> <span class="n">BucketKeyMetadata</span>
-
+<span class="kn">from</span> <span class="nn">.common.cloud_local_map</span> <span class="kn">import</span> <span class="n">CloudLocalMap</span>
 <span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">config</span>
-<span class="kn">from</span> <span class="nn">.platforms.azure_cloud_storage</span> <span class="kn">import</span> <span class="n">AzureCloudStorage</span>
 <span class="kn">from</span> <span class="nn">.platforms.ibm_cloud_storage</span> <span class="kn">import</span> <span class="n">IbmCloudStorage</span>
+<span class="kn">from</span> <span class="nn">.types.bucket_key</span> <span class="kn">import</span> <span class="n">BucketKeyMetadata</span>
+<span class="kn">from</span> <span class="nn">.types.ibm_configuration</span> <span class="kn">import</span> <span class="n">IbmConfiguration</span>
 
 
 <span class="k">class</span> <span class="nc">FileBroker</span><span class="p">:</span>
@@ -105,7 +104,7 @@
 
 <span class="sd">    The ideal way is to use `async with` syntax, don&#39;t forget to use the `async` keyword, it&#39;s important!</span>
 <span class="sd">    ```</span>
-<span class="sd">    async with FileBroker() as file_broker:</span>
+<span class="sd">    async with FileBroker(config) as file_broker:</span>
 <span class="sd">        file_broker.upload_files(...)</span>
 <span class="sd">    ```</span>
 
@@ -124,8 +123,13 @@
 <span class="sd">    if you&#39;re connecting to the same host each time.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">DEFAULT_PLATFORM</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">configuration</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">IbmConfiguration</span><span class="p">],</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">DEFAULT_PLATFORM</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">platform</span> <span class="o">=</span> <span class="n">platform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">configuration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -133,9 +137,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__create_aiohttp_session</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="n">config</span><span class="o">.</span><span class="n">SupportedPlatforms</span><span class="o">.</span><span class="n">IBM</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="n">IbmCloudStorage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="n">config</span><span class="o">.</span><span class="n">SupportedPlatforms</span><span class="o">.</span><span class="n">AZURE</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="n">AzureCloudStorage</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="n">IbmCloudStorage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cloud platform not supported&quot;</span><span class="p">)</span>
 
@@ -148,11 +150,11 @@
         <span class="k">return</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Open an aiohttp session &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Open an aiohttp session&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aenter__</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Close the aiohttp session &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Close the aiohttp session&quot;&quot;&quot;</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aexit__</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
@@ -317,7 +319,7 @@
 
 <span class="sd">    The ideal way is to use `async with` syntax, don&#39;t forget to use the `async` keyword, it&#39;s important!</span>
 <span class="sd">    ```</span>
-<span class="sd">    async with FileBroker() as file_broker:</span>
+<span class="sd">    async with FileBroker(config) as file_broker:</span>
 <span class="sd">        file_broker.upload_files(...)</span>
 <span class="sd">    ```</span>
 
@@ -336,8 +338,13 @@
 <span class="sd">    if you&#39;re connecting to the same host each time.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">DEFAULT_PLATFORM</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">configuration</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">IbmConfiguration</span><span class="p">],</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">DEFAULT_PLATFORM</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">platform</span> <span class="o">=</span> <span class="n">platform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">configuration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -345,9 +352,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">__create_aiohttp_session</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="n">config</span><span class="o">.</span><span class="n">SupportedPlatforms</span><span class="o">.</span><span class="n">IBM</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="n">IbmCloudStorage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="n">config</span><span class="o">.</span><span class="n">SupportedPlatforms</span><span class="o">.</span><span class="n">AZURE</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="n">AzureCloudStorage</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="n">IbmCloudStorage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cloud platform not supported&quot;</span><span class="p">)</span>
 
@@ -360,11 +365,11 @@
         <span class="k">return</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Open an aiohttp session &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Open an aiohttp session&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aenter__</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Close the aiohttp session &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Close the aiohttp session&quot;&quot;&quot;</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aexit__</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
@@ -515,7 +520,7 @@
 
 <p>The ideal way is to use <code>async with</code> syntax, don't forget to use the <code>async</code> keyword, it's important!</p>
 
-<pre><code>async with FileBroker() as file_broker:
+<pre><code>async with FileBroker(config) as file_broker:
     file_broker.upload_files(...)
 </code></pre>
 
@@ -538,13 +543,21 @@ if you're connecting to the same host each time.</p>
                                         <div class="attr function"><a class="headerlink" href="#FileBroker.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">FileBroker</span><span class="signature">(platform: str = &#39;ibm&#39;)</span>
+            <span class="name">FileBroker</span><span class="signature">(
+    configuration: <a href="types/ibm_configuration.html#IbmConfiguration">cloud_storage_utility.types.ibm_configuration.IbmConfiguration</a>,
+    platform: str = &#39;ibm&#39;
+)</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">DEFAULT_PLATFORM</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">configuration</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">IbmConfiguration</span><span class="p">],</span>
+        <span class="n">platform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">DEFAULT_PLATFORM</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">platform</span> <span class="o">=</span> <span class="n">platform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">configuration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="kc">None</span>
 </pre></div>
@@ -565,7 +578,7 @@ if you're connecting to the same host each time.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Open an aiohttp session &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Open an aiohttp session&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aenter__</span><span class="p">()</span>
 </pre></div>
 
@@ -587,7 +600,7 @@ if you're connecting to the same host each time.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Close the aiohttp session &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Close the aiohttp session&quot;&quot;&quot;</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__aexit__</span><span class="p">(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span>
 </pre></div>
 

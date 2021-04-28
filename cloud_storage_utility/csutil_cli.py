@@ -1,5 +1,4 @@
-"""Root module for csutil CLI."""
-
+"""Change"""
 import asyncio
 import fnmatch
 import glob
@@ -44,7 +43,7 @@ _global_test_options = [
         is_flag=True,
         default=False,
         help="Stop on failure",
-    ),
+    )
 ]
 
 

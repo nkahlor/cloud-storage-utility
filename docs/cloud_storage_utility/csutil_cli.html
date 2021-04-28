@@ -48,13 +48,12 @@
                     <h1 class="modulename">
 <a href="./../cloud_storage_utility.html">cloud_storage_utility</a>.csutil_cli    </h1>
 
-                        <div class="docstring"><p>Root module for csutil CLI.</p>
+                        <div class="docstring"><p>Change</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Root module for csutil CLI.&quot;&quot;&quot;</span>
-
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Change&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">import</span> <span class="nn">fnmatch</span>
 <span class="kn">import</span> <span class="nn">glob</span>
@@ -69,6 +68,8 @@
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">.common.cloud_local_map</span> <span class="kn">import</span> <span class="n">CloudLocalMap</span>
+<span class="kn">from</span> <span class="nn">.common.util</span> <span class="kn">import</span> <span class="n">run</span>
+<span class="kn">from</span> <span class="nn">.config.config</span> <span class="kn">import</span> <span class="n">COS_CONFIG</span><span class="p">,</span> <span class="n">DEFAULT_PLATFORM</span>
 <span class="kn">from</span> <span class="nn">.file_broker</span> <span class="kn">import</span> <span class="n">FileBroker</span>
 
 <span class="n">UNLIMITED_ARGS</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -78,6 +79,7 @@
 <span class="n">PROGRESS_BAR_UNITS</span> <span class="o">=</span> <span class="s2">&quot;files&quot;</span>
 
 <span class="n">DESIRED_PLATFORM</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;CSUTIL_DEFAULT_PLATFORM&quot;</span><span class="p">)</span>
+<span class="n">CONFIG</span> <span class="o">=</span> <span class="n">COS_CONFIG</span><span class="p">[</span><span class="n">DEFAULT_PLATFORM</span><span class="p">]</span>
 
 <span class="n">init</span><span class="p">()</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;csutil-error.log&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
@@ -96,7 +98,7 @@
         <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Stop on failure&quot;</span><span class="p">,</span>
-    <span class="p">),</span>
+    <span class="p">)</span>
 <span class="p">]</span>
 
 
@@ -106,6 +108,15 @@
     <span class="k">return</span> <span class="n">func</span>
 
 
+<span class="k">def</span> <span class="nf">__filter_cloud_keys</span><span class="p">(</span><span class="n">wildcard_patterns</span><span class="p">,</span> <span class="n">cloud_keys</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+    <span class="n">filtered_keys</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wildcard_patterns</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">wildcard</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">wildcard</span> <span class="ow">in</span> <span class="n">wildcard_patterns</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">wildcard</span> <span class="ow">in</span> <span class="n">wildcard_patterns</span><span class="p">:</span>
+        <span class="n">wildcard</span> <span class="o">=</span> <span class="n">wildcard</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">filtered_keys</span> <span class="o">+=</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">cloud_keys</span><span class="p">,</span> <span class="n">wildcard</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">filtered_keys</span>
+
+
 <span class="k">def</span> <span class="nf">run_async</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Allows you to run a click command asynchronously.</span>
@@ -113,7 +124,7 @@
     <span class="n">func</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">coroutine</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">inner_handler</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="n">run</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">update_wrapper</span><span class="p">(</span><span class="n">inner_handler</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
 
@@ -161,13 +172,13 @@
 <span class="nd">@click</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">version_option</span><span class="p">(</span><span class="n">__version__</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">execute_cli</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Create a cli group in click.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Interact with cloud storage from multiple cloud providers all through one CLI!&quot;&quot;&quot;</span>
     <span class="k">pass</span>
 
 
-<span class="c1"># TODO: Allow filtering of these keys so we can search the contents of a bucket</span>
 <span class="nd">@execute_cli</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;bucket-name&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;cloud-key-wildcards&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">UNLIMITED_ARGS</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
     <span class="s2">&quot;-p&quot;</span><span class="p">,</span>
     <span class="s2">&quot;--prefix&quot;</span><span class="p">,</span>
@@ -179,13 +190,17 @@
     <span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="s2">&quot;--delimiter&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set the prefix delimiter&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;/&quot;</span>
 <span class="p">)</span>
 <span class="nd">@run_async</span>
-<span class="k">async</span> <span class="k">def</span> <span class="nf">list_remote</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">list_remote</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">cloud_key_wildcards</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;List contents of cloud bucket.&quot;&quot;&quot;</span>
-    <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">()</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="k">await</span> <span class="n">file_broker</span><span class="o">.</span><span class="n">get_bucket_keys</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No Keys found matching the prefix </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> in </span><span class="si">{</span><span class="n">bucket_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cloud_key_wildcards</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cloud_key_wildcards</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]</span>
+
+            <span class="n">keys</span> <span class="o">=</span> <span class="n">__filter_cloud_keys</span><span class="p">(</span><span class="n">cloud_key_wildcards</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">keys</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
@@ -197,7 +212,7 @@
     <span class="s2">&quot;-p&quot;</span><span class="p">,</span>
     <span class="s2">&quot;--prefix&quot;</span><span class="p">,</span>
     <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only pull files with matching prefix&quot;</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only push files with matching prefix&quot;</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nd">@run_async</span>
@@ -228,7 +243,7 @@
             <span class="n">unit</span><span class="o">=</span><span class="n">PROGRESS_BAR_UNITS</span><span class="p">,</span>
             <span class="n">colour</span><span class="o">=</span><span class="n">PROGRESS_BAR_COLOR</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">()</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
             <span class="k">await</span> <span class="n">file_broker</span><span class="o">.</span><span class="n">upload_files</span><span class="p">(</span>
                 <span class="n">cloud_bucket</span><span class="p">,</span>
                 <span class="n">cloud_map_list</span><span class="p">,</span>
@@ -262,14 +277,12 @@
 <span class="sd">    IMPORTANT: WRAP YOUR WILDCARDS IN QUOTES</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Get the names of all the files in the bucket</span>
-    <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">()</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
         <span class="n">bucket_contents</span> <span class="o">=</span> <span class="k">await</span> <span class="n">file_broker</span><span class="o">.</span><span class="n">get_bucket_keys</span><span class="p">(</span><span class="n">cloud_bucket</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
-
         <span class="c1"># Filter out the ones we need</span>
-        <span class="n">keys_to_download</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">wildcard</span> <span class="ow">in</span> <span class="n">cloud_key_wildcards</span><span class="p">:</span>
-            <span class="n">wildcard</span> <span class="o">=</span> <span class="n">wildcard</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">keys_to_download</span> <span class="o">+=</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">bucket_contents</span><span class="p">,</span> <span class="n">wildcard</span><span class="p">)</span>
+        <span class="n">keys_to_download</span> <span class="o">=</span> <span class="n">__filter_cloud_keys</span><span class="p">(</span>
+            <span class="n">cloud_key_wildcards</span><span class="p">,</span> <span class="n">bucket_contents</span><span class="p">,</span> <span class="n">prefix</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys_to_download</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span>
@@ -296,17 +309,22 @@
 
 <span class="nd">@execute_cli</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;cloud-bucket&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">)</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;cloud-key-wildcard&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">UNLIMITED_ARGS</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;cloud-key-wildcards&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">UNLIMITED_ARGS</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;-p&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;--prefix&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">STRING</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Only delete files with matching prefix&quot;</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="nd">@run_async</span>
-<span class="k">async</span> <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">cloud_bucket</span><span class="p">,</span> <span class="n">cloud_key_wildcard</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">cloud_bucket</span><span class="p">,</span> <span class="n">cloud_key_wildcards</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Delete files from the cloud bucket.&quot;&quot;&quot;</span>
-    <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">()</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
-        <span class="n">bucket_contents</span> <span class="o">=</span> <span class="k">await</span> <span class="n">file_broker</span><span class="o">.</span><span class="n">get_bucket_keys</span><span class="p">(</span><span class="n">cloud_bucket</span><span class="p">)</span>
-
-        <span class="n">keys_to_delete</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">wildcard</span> <span class="ow">in</span> <span class="n">cloud_key_wildcard</span><span class="p">:</span>
-            <span class="n">wildcard</span> <span class="o">=</span> <span class="n">wildcard</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">keys_to_delete</span> <span class="o">+=</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">bucket_contents</span><span class="p">,</span> <span class="n">wildcard</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">FileBroker</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_broker</span><span class="p">:</span>
+        <span class="n">bucket_contents</span> <span class="o">=</span> <span class="k">await</span> <span class="n">file_broker</span><span class="o">.</span><span class="n">get_bucket_keys</span><span class="p">(</span><span class="n">cloud_bucket</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
+        <span class="n">keys_to_delete</span> <span class="o">=</span> <span class="n">__filter_cloud_keys</span><span class="p">(</span>
+            <span class="n">cloud_key_wildcards</span><span class="p">,</span> <span class="n">bucket_contents</span><span class="p">,</span> <span class="n">prefix</span>
+        <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys_to_delete</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span>
@@ -354,7 +372,7 @@
     <span class="n">func</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">coroutine</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">inner_handler</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="n">run</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">update_wrapper</span><span class="p">(</span><span class="n">inner_handler</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
 </pre></div>

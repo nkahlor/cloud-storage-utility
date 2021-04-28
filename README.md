@@ -75,7 +75,7 @@ from cloud_storage_utility.file_broker import FileBroker
 
 config = IbmConfiguration(
     auth_endpoint="http://ibm-endpoint.com/auth",
-    cos_endpoint="https://ibm-endpoint.com/cos", 
+    cos_endpoint="https://ibm-endpoint.com/cos",
     api_key="<api-key>"
 )
 
