@@ -37,6 +37,7 @@ pdoc = "*"
 tox = "*"
 tox-pipenv = "*"
 aioresponses = "*"
+pre-commit = "*"
 
 [pipenv]
 allow_prereleases = true
