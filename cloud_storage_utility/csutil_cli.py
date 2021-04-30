@@ -1,5 +1,4 @@
 """Root module for csutil CLI."""
-
 import asyncio
 import fnmatch
 import glob
@@ -44,7 +43,7 @@ _global_test_options = [
         is_flag=True,
         default=False,
         help="Stop on failure",
-    ),
+    )
 ]
 
 
@@ -54,8 +53,11 @@ def __global_test_options(func):
     return func
 
 
+# TODO: Support other delimiters when the need arises
 def __filter_cloud_keys(wildcard_patterns, cloud_keys, prefix):
     filtered_keys = []
+    if prefix == "":
+        prefix = "*/"
     wildcard_patterns = [f"{prefix}{wildcard}" for wildcard in wildcard_patterns]
     for wildcard in wildcard_patterns:
         wildcard = wildcard.strip()
@@ -132,14 +134,11 @@ def execute_cli():
     help="Prefix to prepend the filename with in the cloud",
     default="",
 )
-@click.option(
-    "-d", "--delimiter", type=click.STRING, help="Set the prefix delimiter", default="/"
-)
 @run_async
-async def list_remote(bucket_name, cloud_key_wildcards, prefix, delimiter):
+async def list_remote(bucket_name, cloud_key_wildcards, prefix):
     """List contents of cloud bucket."""
     async with FileBroker(CONFIG) as file_broker:
-        keys = await file_broker.get_bucket_keys(bucket_name, prefix, delimiter)
+        keys = await file_broker.get_bucket_keys(bucket_name, prefix)
         if len(keys) == 0:
             print(f"No Keys found matching the prefix {prefix} in {bucket_name}")
         else:

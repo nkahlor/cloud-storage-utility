@@ -79,19 +79,18 @@ class FileBroker:
         await self.__aexit__(*sys.exc_info())
 
     async def get_bucket_keys(
-        self, bucket_name: str, prefix: str = "", delimiter: str = "/"
+        self, bucket_name: str, prefix: str = ""
     ) -> Dict[str, BucketKeyMetadata]:
         """Get the names of all the keys in the bucket.
 
         Args:
             bucket_name(str): The target bucket
             prefix(str, optional): Only return keys matching this prefix
-            delimiter(str, optional): Delimiter between prefix and key-name
 
         Returns:
             List of keys from the targeted bucket
         """
-        return await self.service.get_bucket_keys(bucket_name, prefix, delimiter)  # type: ignore
+        return await self.service.get_bucket_keys(bucket_name, prefix)  # type: ignore
 
     async def upload_files(
         self,

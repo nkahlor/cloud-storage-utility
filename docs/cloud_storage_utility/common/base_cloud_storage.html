@@ -79,9 +79,9 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Coroutine</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
 
-<span class="kn">from</span> <span class="nn">cloud_storage_utility.common.cloud_local_map</span> <span class="kn">import</span> <span class="n">CloudLocalMap</span>
-<span class="kn">from</span> <span class="nn">cloud_storage_utility.common.util</span> <span class="kn">import</span> <span class="n">strip_prefix</span>
-<span class="kn">from</span> <span class="nn">cloud_storage_utility.types.bucket_key</span> <span class="kn">import</span> <span class="n">BucketKeyMetadata</span>
+<span class="kn">from</span> <span class="nn">..common.cloud_local_map</span> <span class="kn">import</span> <span class="n">CloudLocalMap</span>
+<span class="kn">from</span> <span class="nn">..common.util</span> <span class="kn">import</span> <span class="n">strip_prefix</span>
+<span class="kn">from</span> <span class="nn">..types.bucket_key</span> <span class="kn">import</span> <span class="n">BucketKeyMetadata</span>
 
 <span class="c1"># 5 MB chunks</span>
 <span class="n">DEFAULT_PART_SIZE</span> <span class="o">=</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">5</span>
@@ -116,7 +116,7 @@
 
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;An implementation of this must provide a way to list the contents of a bucket.</span>
 
@@ -125,8 +125,6 @@
 <span class="sd">                Target bucket.</span>
 <span class="sd">            prefix (str, optional):</span>
 <span class="sd">                Only get keys that match this prefix.</span>
-<span class="sd">            delimiter (str, optional):</span>
-<span class="sd">                Set the delimiter, defaults to &#39;/&#39;. i.e, photos/image.jpeg</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict[str, BucketKeyMetadata]:</span>
@@ -382,7 +380,7 @@
 
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;An implementation of this must provide a way to list the contents of a bucket.</span>
 
@@ -391,8 +389,6 @@
 <span class="sd">                Target bucket.</span>
 <span class="sd">            prefix (str, optional):</span>
 <span class="sd">                Only get keys that match this prefix.</span>
-<span class="sd">            delimiter (str, optional):</span>
-<span class="sd">                Set the delimiter, defaults to &#39;/&#39;. i.e, photos/image.jpeg</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict[str, BucketKeyMetadata]:</span>
@@ -666,8 +662,7 @@ inherit from this.</p>
             <span class="name">get_bucket_keys</span><span class="signature">(
     self,
     bucket_name: str,
-    prefix: str = &#39;&#39;,
-    delimiter: str = &#39;/&#39;
+    prefix: str = &#39;&#39;
 ) -&gt; Dict[str, <a href="../types/bucket_key.html#BucketKeyMetadata">cloud_storage_utility.types.bucket_key.BucketKeyMetadata</a>]</span>:
     </div>
 
@@ -675,7 +670,7 @@ inherit from this.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">get_bucket_keys</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BucketKeyMetadata</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;An implementation of this must provide a way to list the contents of a bucket.</span>
 
@@ -684,8 +679,6 @@ inherit from this.</p>
 <span class="sd">                Target bucket.</span>
 <span class="sd">            prefix (str, optional):</span>
 <span class="sd">                Only get keys that match this prefix.</span>
-<span class="sd">            delimiter (str, optional):</span>
-<span class="sd">                Set the delimiter, defaults to &#39;/&#39;. i.e, photos/image.jpeg</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Dict[str, BucketKeyMetadata]:</span>
@@ -717,7 +710,6 @@ inherit from this.</p>
 <ul>
 <li><strong>bucket_name (str):</strong>  Target bucket.</li>
 <li><strong>prefix (str, optional):</strong>  Only get keys that match this prefix.</li>
-<li><strong>delimiter (str, optional):</strong>  Set the delimiter, defaults to '/'. i.e, photos/image.jpeg</li>
 </ul>
 
 <h6 id="returns">Returns</h6>

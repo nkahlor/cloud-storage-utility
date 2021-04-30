@@ -26,7 +26,6 @@
                     <h2>Contents</h2>
                     <ul>
   <li><a href="#ibm">IBM</a></li>
-  <li><a href="#azure">Azure</a></li>
 </ul>
 
 
@@ -38,9 +37,6 @@
                             <ul class="memberlist">
                         <li>
                                 <a class="function" href="#SupportedPlatforms.__init__">SupportedPlatforms</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#SupportedPlatforms.AZURE">AZURE</a>
                         </li>
                         <li>
                                 <a class="variable" href="#SupportedPlatforms.IBM">IBM</a>
@@ -76,17 +72,6 @@
 | CSUTIL_IBM_AUTH_ENDPOINT          | IBM_CONFIG['auth_endpoint'] |
 | CSUTIL_IBM_COS_ENDPOINT           | IBM_CONFIG['cos_endpoint']  |
 </code></pre>
-
-<h4 id="azure">Azure</h4>
-
-<pre><code>| Environment Variable                      | Config Dictionary                     |
-|-----------------------------------        |-------------------------------------- |
-| CSUTIL_AZURE_CLIENT_ID                    | AZURE_CONFIG['client_id']             |
-| CSUTIL_AZURE_CLIENT_SECRET                | AZURE_CONFIG['client_secret']         |
-| CSUTIL_AZURE_STORAGE_ACCOUNT_NAME         | AZURE_CONFIG['storage_account_name']  |
-| CSUTIL_AZURE_TENANT_ID                    | AZURE_CONFIG['tenant_id']             |
-| CSUTIL_AZURE_CONNECTION_STRING            | AZURE_CONFIG['connection_string']     |
-</code></pre>
 </div>
 
                         <details>
@@ -102,29 +87,20 @@
 <span class="sd">    | CSUTIL_IBM_API_KEY                | IBM_CONFIG[&#39;api_key&#39;]       |</span>
 <span class="sd">    | CSUTIL_IBM_AUTH_ENDPOINT          | IBM_CONFIG[&#39;auth_endpoint&#39;] |</span>
 <span class="sd">    | CSUTIL_IBM_COS_ENDPOINT           | IBM_CONFIG[&#39;cos_endpoint&#39;]  |</span>
-
-
-<span class="sd">#### Azure</span>
-<span class="sd">    | Environment Variable              	| Config Dictionary                    	|</span>
-<span class="sd">    |-----------------------------------	|--------------------------------------	|</span>
-<span class="sd">    | CSUTIL_AZURE_CLIENT_ID            	| AZURE_CONFIG[&#39;client_id&#39;]            	|</span>
-<span class="sd">    | CSUTIL_AZURE_CLIENT_SECRET        	| AZURE_CONFIG[&#39;client_secret&#39;]        	|</span>
-<span class="sd">    | CSUTIL_AZURE_STORAGE_ACCOUNT_NAME 	| AZURE_CONFIG[&#39;storage_account_name&#39;] 	|</span>
-<span class="sd">    | CSUTIL_AZURE_TENANT_ID            	| AZURE_CONFIG[&#39;tenant_id&#39;]            	|</span>
-<span class="sd">    | CSUTIL_AZURE_CONNECTION_STRING    	| AZURE_CONFIG[&#39;connection_string&#39;]    	|</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
 
+<span class="kn">from</span> <span class="nn">..types.ibm_configuration</span> <span class="kn">import</span> <span class="n">IbmConfiguration</span>
+
 <span class="n">load_dotenv</span><span class="p">()</span>
 
 
 <span class="k">class</span> <span class="nc">SupportedPlatforms</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Lists all supported cloud platforms &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Lists all supported cloud platforms&quot;&quot;&quot;</span>
 
-    <span class="n">AZURE</span> <span class="o">=</span> <span class="s2">&quot;azure&quot;</span>
     <span class="n">IBM</span> <span class="o">=</span> <span class="s2">&quot;ibm&quot;</span>
 
 
@@ -137,18 +113,12 @@
 
 <span class="n">DEFAULT_PLATFORM</span> <span class="o">=</span> <span class="n">SupportedPlatforms</span><span class="o">.</span><span class="n">IBM</span>
 
-<span class="n">IBM_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;api_key&quot;</span><span class="p">:</span> <span class="n">__get_from_env</span><span class="p">(</span><span class="s2">&quot;CSUTIL_IBM_API_KEY&quot;</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="s2">&quot;IBMCLOUD_API_KEY&quot;</span><span class="p">),</span>
-    <span class="s2">&quot;auth_endpoint&quot;</span><span class="p">:</span> <span class="n">__get_from_env</span><span class="p">(</span><span class="s2">&quot;CSUTIL_IBM_AUTH_ENDPOINT&quot;</span><span class="p">),</span>
-    <span class="s2">&quot;cos_endpoint&quot;</span><span class="p">:</span> <span class="n">__get_from_env</span><span class="p">(</span><span class="s2">&quot;CSUTIL_IBM_COS_ENDPOINT&quot;</span><span class="p">),</span>
-<span class="p">}</span>
-
-<span class="n">AZURE_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;client_id&quot;</span><span class="p">:</span> <span class="n">__get_from_env</span><span class="p">(</span><span class="s2">&quot;CSUTIL_AZURE_CLIENT_ID&quot;</span><span class="p">),</span>
-    <span class="s2">&quot;client_secret&quot;</span><span class="p">:</span> <span class="n">__get_from_env</span><span class="p">(</span><span class="s2">&quot;CSUTIL_AZURE_CLIENT_SECRET&quot;</span><span class="p">),</span>
-    <span class="s2">&quot;storage_account_name&quot;</span><span class="p">:</span> <span class="n">__get_from_env</span><span class="p">(</span><span class="s2">&quot;CSUTIL_AZURE_STORAGE_ACCOUNT_NAME&quot;</span><span class="p">),</span>
-    <span class="s2">&quot;tenant_id&quot;</span><span class="p">:</span> <span class="n">__get_from_env</span><span class="p">(</span><span class="s2">&quot;CSUTIL_AZURE_TENANT_ID&quot;</span><span class="p">),</span>
-    <span class="s2">&quot;connection_string&quot;</span><span class="p">:</span> <span class="n">__get_from_env</span><span class="p">(</span><span class="s2">&quot;CSUTIL_AZURE_CONNECTION_STRING&quot;</span><span class="p">),</span>
+<span class="n">COS_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">SupportedPlatforms</span><span class="o">.</span><span class="n">IBM</span><span class="p">:</span> <span class="n">IbmConfiguration</span><span class="p">(</span>
+        <span class="n">auth_endpoint</span><span class="o">=</span><span class="n">__get_from_env</span><span class="p">(</span><span class="s2">&quot;CSUTIL_IBM_AUTH_ENDPOINT&quot;</span><span class="p">),</span>
+        <span class="n">cos_endpoint</span><span class="o">=</span><span class="n">__get_from_env</span><span class="p">(</span><span class="s2">&quot;CSUTIL_IBM_COS_ENDPOINT&quot;</span><span class="p">),</span>
+        <span class="n">api_key</span><span class="o">=</span><span class="n">__get_from_env</span><span class="p">(</span><span class="s2">&quot;CSUTIL_IBM_API_KEY&quot;</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="s2">&quot;IBMCLOUD_API_KEY&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
 <span class="p">}</span>
 </pre></div>
 
@@ -167,9 +137,8 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">SupportedPlatforms</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; Lists all supported cloud platforms &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Lists all supported cloud platforms&quot;&quot;&quot;</span>
 
-    <span class="n">AZURE</span> <span class="o">=</span> <span class="s2">&quot;azure&quot;</span>
     <span class="n">IBM</span> <span class="o">=</span> <span class="s2">&quot;ibm&quot;</span>
 </pre></div>
 
@@ -187,15 +156,6 @@
     </div>
 
         
-    
-
-                            </div>
-                            <div id="SupportedPlatforms.AZURE" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#SupportedPlatforms.AZURE">#&nbsp;&nbsp</a>
-
-        <span class="name">AZURE</span><span class="default_value"> = &#39;azure&#39;</span>
-    </div>
-
     
 
                             </div>

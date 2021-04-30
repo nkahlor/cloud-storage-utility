@@ -1,0 +1,45 @@
+default_language_version:
+    python: python3.9
+files: ^cloud_storage_utility/
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: check-ast
+-   repo: local
+    hooks:
+    -   id: pdoc
+        name: Generate docs
+        entry: pipenv run documentation
+        pass_filenames: false
+        types: [python]
+        language: system
+        
+    -   id: import-sort
+        name: Sort python imports
+        entry: pipenv run import-sort
+        pass_filenames: false
+        language: system
+        types: [python]
+        
+    -   id: black
+        name: Format python code
+        entry: pipenv run format
+        pass_filenames: false
+        language: system
+        types: [python]
+        
+    -   id: lint
+        name: Lint python code
+        entry: pipenv run lint
+        pass_filenames: false
+        language: system
+        types: [python]
+        
+    -   id: mypy
+        name: Type check python code
+        entry: pipenv run mypy
+        pass_filenames: false
+        language: system
+        types: [python]
+        

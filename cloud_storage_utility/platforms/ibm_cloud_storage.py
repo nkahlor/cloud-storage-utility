@@ -24,7 +24,7 @@ class IbmCloudStorage(BaseCloudStorage):
         self.__access_token = ""
 
     async def get_bucket_keys(
-        self, bucket_name: str, prefix: str = "", delimiter="/"
+        self, bucket_name: str, prefix: str = ""
     ) -> Dict[str, BucketKeyMetadata]:
         try:
             access_token = await self.__get_auth_token()
@@ -35,8 +35,6 @@ class IbmCloudStorage(BaseCloudStorage):
             params: Dict[str, str] = {}
             if prefix and prefix != "":
                 params = {"prefix": prefix.strip(), **params}
-                if delimiter:
-                    params = {"delimiter": delimiter, **params}
 
             all_items = {}
             is_truncated = True
@@ -46,7 +44,6 @@ class IbmCloudStorage(BaseCloudStorage):
                     params = {
                         "continuation-token": continuation_token,
                         "prefix": prefix,
-                        "delimiter": delimiter,
                     }
                 async with self.__session.get(
                     f"{self.__cos_endpoint}/{bucket_name}?list-type=2",
@@ -206,16 +203,14 @@ class IbmCloudStorage(BaseCloudStorage):
     ) -> bool:
         download_succeeded = None
         try:
-            if prefix:
-                cloud_key = f"{prefix}{cloud_key}"
             access_token = await self.__get_auth_token()
             headers = {"Authorization": f"Bearer {access_token}"}
             async with self.__session.get(
                 f"{self.__cos_endpoint}/{bucket_name}/{cloud_key}",
                 headers=headers,
             ) as response:
-                with open(destination_filepath, "w") as downloaded_file:
-                    downloaded_file.write(await response.text())
+                with open(destination_filepath, "wb") as downloaded_file:
+                    downloaded_file.write(await response.read())
 
             download_succeeded = True
         except Exception as error:
