@@ -68,7 +68,7 @@ class FileBroker:
         await self.session.close()
 
     async def __create_aiohttp_session(self):
-        return aiohttp.ClientSession()
+        return aiohttp.ClientSession(trust_env=True)
 
     async def open(self):
         """Open an aiohttp session"""
