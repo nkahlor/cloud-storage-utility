@@ -70,6 +70,12 @@ class FileBroker:
     async def __create_aiohttp_session(self):
         return aiohttp.ClientSession(trust_env=True)
 
+    async def __gather_results(self, tasks):
+        results = []
+        for i in range(0, len(tasks), self.config.batch_limit):
+            results += await asyncio.gather(*tasks[i : i + self.config.batch_limit])
+        return results
+
     async def open(self):
         """Open an aiohttp session"""
         return await self.__aenter__()
@@ -116,7 +122,7 @@ class FileBroker:
         upload_tasks = self.service.get_upload_files_coroutines(  # type: ignore
             bucket_name, cloud_map_list, prefix, callback
         )
-        await asyncio.gather(*upload_tasks)
+        await self.__gather_results(upload_tasks)
 
     async def download_files(
         self,
@@ -145,7 +151,7 @@ class FileBroker:
         download_tasks = self.service.get_download_files_coroutines(  # type: ignore
             bucket_name, local_directory, file_names, prefix, callback
         )
-        await asyncio.gather(*download_tasks)
+        await self.__gather_results(download_tasks)
 
     async def remove_items(
         self,
@@ -169,7 +175,7 @@ class FileBroker:
         remove_tasks = self.service.get_remove_items_coroutines(  # type: ignore
             bucket_name, cloud_keys, callback
         )
-        await asyncio.gather(*remove_tasks)
+        await self.__gather_results(remove_tasks)
 
     async def sync_local_files(
         self,
