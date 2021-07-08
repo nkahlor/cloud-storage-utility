@@ -53,11 +53,10 @@ def __global_test_options(func):
     return func
 
 
-# TODO: Support other delimiters when the need arises
 def __filter_cloud_keys(wildcard_patterns, cloud_keys, prefix):
     filtered_keys = []
     if prefix == "":
-        prefix = "*/"
+        prefix = "*?"
     wildcard_patterns = [f"{prefix}{wildcard}" for wildcard in wildcard_patterns]
     for wildcard in wildcard_patterns:
         wildcard = wildcard.strip()
