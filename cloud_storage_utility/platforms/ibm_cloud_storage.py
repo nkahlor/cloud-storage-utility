@@ -56,21 +56,20 @@ class IbmCloudStorage(BaseCloudStorage):
                         if "Key" in response_dict["Contents"]:
                             item = response_dict["Contents"]
                             items = {
-                                item["Key"]: {
+                                item["Key"]:
                                     BucketKeyMetadata(
                                         last_modified=item["LastModified"],
                                         bytes=item["Size"],
                                     )
-                                }
+
                             }
                         else:
                             items = {
-                                item["Key"]: {
+                                item["Key"]:
                                     BucketKeyMetadata(
                                         last_modified=item["LastModified"],
                                         bytes=item["Size"],
                                     )
-                                }
                                 for item in response_dict["Contents"]
                             }
 
