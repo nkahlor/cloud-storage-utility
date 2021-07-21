@@ -10,5 +10,5 @@ class BucketKeyMetadata(NamedTuple):
     bytes: file-size
     """
 
-    last_modified: int
-    bytes: str
+    last_modified: str
+    bytes: int

@@ -59,8 +59,7 @@ class IbmCloudStorage(BaseCloudStorage):
                                 item["Key"]:
                                     BucketKeyMetadata(
                                         last_modified=item["LastModified"],
-                                        bytes=item["Size"],
-                                    )
+                                        bytes=int(item["Size"]))
 
                             }
                         else:
@@ -68,7 +67,7 @@ class IbmCloudStorage(BaseCloudStorage):
                                 item["Key"]:
                                     BucketKeyMetadata(
                                         last_modified=item["LastModified"],
-                                        bytes=item["Size"],
+                                        bytes=int(item["Size"]),
                                     )
                                 for item in response_dict["Contents"]
                             }
