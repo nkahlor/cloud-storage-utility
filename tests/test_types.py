@@ -11,7 +11,5 @@ class TestTypes(unittest.TestCase):
         metadata = BucketKeyMetadata(last_modified="2021-07-18T20:15:01.439Z", bytes="5")
         self.assertNotEqual(metadata.bytes, int(metadata.bytes))
 
-
-
 if __name__ == '__main__':
     unittest.main()
