@@ -130,20 +130,17 @@
                         <span class="k">if</span> <span class="s2">&quot;Key&quot;</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]:</span>
                             <span class="n">item</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
                             <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
-                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span>
-                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
-                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
-                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
-                                    <span class="p">)</span>
-
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                    <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                    <span class="nb">bytes</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">]),</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
-                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span>
-                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
-                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
-                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
-                                    <span class="p">)</span>
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                    <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                    <span class="nb">bytes</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">]),</span>
+                                <span class="p">)</span>
                                 <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
                             <span class="p">}</span>
 
@@ -377,20 +374,17 @@
                         <span class="k">if</span> <span class="s2">&quot;Key&quot;</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]:</span>
                             <span class="n">item</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
                             <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
-                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span>
-                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
-                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
-                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
-                                    <span class="p">)</span>
-
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                    <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                    <span class="nb">bytes</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">]),</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
-                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span>
-                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
-                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
-                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
-                                    <span class="p">)</span>
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                    <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                    <span class="nb">bytes</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">]),</span>
+                                <span class="p">)</span>
                                 <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
                             <span class="p">}</span>
 
@@ -654,20 +648,17 @@
                         <span class="k">if</span> <span class="s2">&quot;Key&quot;</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]:</span>
                             <span class="n">item</span> <span class="o">=</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
                             <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
-                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span>
-                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
-                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
-                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
-                                    <span class="p">)</span>
-
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                    <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                    <span class="nb">bytes</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">]),</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">items</span> <span class="o">=</span> <span class="p">{</span>
-                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span>
-                                    <span class="n">BucketKeyMetadata</span><span class="p">(</span>
-                                        <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
-                                        <span class="nb">bytes</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">],</span>
-                                    <span class="p">)</span>
+                                <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Key&quot;</span><span class="p">]:</span> <span class="n">BucketKeyMetadata</span><span class="p">(</span>
+                                    <span class="n">last_modified</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;LastModified&quot;</span><span class="p">],</span>
+                                    <span class="nb">bytes</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Size&quot;</span><span class="p">]),</span>
+                                <span class="p">)</span>
                                 <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">response_dict</span><span class="p">[</span><span class="s2">&quot;Contents&quot;</span><span class="p">]</span>
                             <span class="p">}</span>
 

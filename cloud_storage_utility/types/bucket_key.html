@@ -70,13 +70,13 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Storing meta-information about a bucket key.</span>
 
-<span class="sd">    last_modified: unix timestamp</span>
+<span class="sd">    last_modified: ISO 8601 format</span>
 
 <span class="sd">    bytes: file-size</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">last_modified</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="nb">bytes</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">last_modified</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="nb">bytes</span><span class="p">:</span> <span class="nb">int</span>
 </pre></div>
 
         </details>
@@ -97,20 +97,20 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Storing meta-information about a bucket key.</span>
 
-<span class="sd">    last_modified: unix timestamp</span>
+<span class="sd">    last_modified: ISO 8601 format</span>
 
 <span class="sd">    bytes: file-size</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">last_modified</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="nb">bytes</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">last_modified</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="nb">bytes</span><span class="p">:</span> <span class="nb">int</span>
 </pre></div>
 
         </details>
 
             <div class="docstring"><p>Storing meta-information about a bucket key.</p>
 
-<p>last_modified: unix timestamp</p>
+<p>last_modified: ISO 8601 format</p>
 
 <p>bytes: file-size</p>
 </div>
@@ -120,7 +120,7 @@
                                         <div class="attr function"><a class="headerlink" href="#BucketKeyMetadata.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">BucketKeyMetadata</span><span class="signature">(last_modified: int, bytes: str)</span>
+            <span class="name">BucketKeyMetadata</span><span class="signature">(last_modified: str, bytes: int)</span>
     </div>
 
         
@@ -132,7 +132,7 @@
                             <div id="BucketKeyMetadata.last_modified" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#BucketKeyMetadata.last_modified">#&nbsp;&nbsp</a>
 
-        <span class="name">last_modified</span><span class="annotation">: int</span>
+        <span class="name">last_modified</span><span class="annotation">: str</span>
     </div>
 
             <div class="docstring"><p>Alias for field number 0</p>
@@ -143,7 +143,7 @@
                             <div id="BucketKeyMetadata.bytes" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#BucketKeyMetadata.bytes">#&nbsp;&nbsp</a>
 
-        <span class="name">bytes</span><span class="annotation">: str</span>
+        <span class="name">bytes</span><span class="annotation">: int</span>
     </div>
 
             <div class="docstring"><p>Alias for field number 1</p>
