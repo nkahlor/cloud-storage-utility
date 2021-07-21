@@ -5,7 +5,7 @@ class BucketKeyMetadata(NamedTuple):
     """
     Storing meta-information about a bucket key.
 
-    last_modified: unix timestamp
+    last_modified: ISO 8601 format
 
     bytes: file-size
     """
