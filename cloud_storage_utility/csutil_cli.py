@@ -23,11 +23,13 @@ COUNT = 0
 PROGRESS_BAR_COLOR = "blue"
 PROGRESS_BAR_UNITS = "files"
 
+DEBUG = os.getenv("DEBUG")
 DESIRED_PLATFORM = os.getenv("CSUTIL_DEFAULT_PLATFORM")
 CONFIG = COS_CONFIG[DEFAULT_PLATFORM]
 
 init()
-logging.basicConfig(filename="csutil-error.log", level=logging.WARNING)
+if DEBUG:
+    logging.basicConfig(filename="csutil-error.log", level=logging.WARNING)
 try:
     __version__ = get_version(root="..", relative_to=__file__)
 except Exception:
