@@ -84,6 +84,10 @@ class FileBroker:
         """Close the aiohttp session"""
         await self.__aexit__(*sys.exc_info())
 
+    async def get_buckets(self):
+        """Get the names of all the buckets available"""
+        return await self.service.get_buckets()
+
     async def get_bucket_keys(
         self, bucket_name: str, prefix: str = ""
     ) -> Dict[str, BucketKeyMetadata]:

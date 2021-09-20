@@ -17,7 +17,7 @@ click = "*"
 python-dotenv = "*"
 tqdm = "*"
 colorama = "*"
-aiohttp = "*"
+aiohttp = "==3.7"
 xmltodict = "*"
 setuptools-scm = "*"
 

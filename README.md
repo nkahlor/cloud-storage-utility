@@ -28,7 +28,7 @@ To configure this application, you have to set a few environment variables.
 
 ```
 # Currently we only support 'ibm'
-CSUTIL_CLOUD_PLATFORM=
+CSUTIL_DEFAULT_PLATFORM=
 
 # You only need to set these if you intend to use ibm
 CSUTIL_IBM_API_KEY=
@@ -53,16 +53,16 @@ csutil push <bucket name> <local-files>
 Here are some examples
 
 ```
-csutil delete example-bucket *.txt
-csutil delete example-bucket *.txt *.md example.csv
+csutil delete example-bucket "*.txt"
+csutil delete example-bucket "*.txt" "*.md" "example.csv"
 
 csutil list-remote example-bucket
 
-csutil pull example-bucket ./dat *
-csutil pull example-bucket ./dat tmp.txt tmp2.txt *.md
+csutil pull example-bucket "./dat" "*"
+csutil pull example-bucket "./dat" "tmp.txt" "tmp2.txt" "*.md"
 
-csutil push example-bucket ./dat/*
-csutil push example-bucket/test_directory ./dat/tmp.txt ./dat/tmp2.txt
+csutil push example-bucket "./dat/*"
+csutil push example-bucket/test_directory "./dat/tmp.txt" "./dat/tmp2.txt"
 ```
 
 ### Python API

@@ -126,6 +126,15 @@ def execute_cli():
 
 
 @execute_cli.command()
+@run_async
+async def list_buckets():
+    async with FileBroker(CONFIG) as file_broker:
+        buckets = await file_broker.get_buckets()
+        bucket_names = [bucket.name for bucket in buckets]
+        print(*bucket_names, sep="\n")
+
+
+@execute_cli.command()
 @click.argument("bucket-name", type=click.STRING)
 @click.argument("cloud-key-wildcards", type=click.STRING, nargs=UNLIMITED_ARGS)
 @click.option(

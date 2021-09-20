@@ -2,11 +2,12 @@ import base64
 import hashlib
 import logging
 import time
-from typing import Dict
+from typing import Dict, List
 
 import xmltodict
 
 from ..common.base_cloud_storage import BaseCloudStorage
+from ..types.bucket_information import BucketInformation
 from ..types.bucket_key import BucketKeyMetadata
 from ..types.ibm_configuration import IbmConfiguration
 
@@ -19,9 +20,35 @@ class IbmCloudStorage(BaseCloudStorage):
         self.__api_key = ibm_config.api_key
         self.__auth_endpoint = ibm_config.auth_endpoint
         self.__cos_endpoint = ibm_config.cos_endpoint
+        self.__crn = ibm_config.crn
         self.__session = session
         self.__expires_at = -1
         self.__access_token = ""
+
+    async def get_buckets(self) -> List[BucketInformation]:
+        try:
+            access_token = await self.__get_auth_token()
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+                "ibm-service-instance-id": self.__crn,
+            }
+            params = {"extended": "true"}
+            async with self.__session.get(
+                self.__cos_endpoint, headers=headers, params=params
+            ) as response:
+                xml_response = await response.text()
+                response_dict = xmltodict.parse(xml_response)["ListAllMyBucketsResult"]
+                raw_buckets = response_dict["Buckets"]["Bucket"]
+                parsed_buckets = [
+                    BucketInformation(
+                        x["Name"], x["CreationDate"], x["LocationConstraint"]
+                    )
+                    for x in raw_buckets
+                ]
+                return parsed_buckets
+        except Exception as error:
+            logging.exception(error)
+            return []
 
     async def get_bucket_keys(
         self, bucket_name: str, prefix: str = ""

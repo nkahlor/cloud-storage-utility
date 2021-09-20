@@ -9,6 +9,7 @@ Takes environment variables and puts them into dictionaries.
     | CSUTIL_IBM_API_KEY                | IBM_CONFIG['api_key']       |
     | CSUTIL_IBM_AUTH_ENDPOINT          | IBM_CONFIG['auth_endpoint'] |
     | CSUTIL_IBM_COS_ENDPOINT           | IBM_CONFIG['cos_endpoint']  |
+    | CSUTIL_IBM_COS_CRN                | IBM_CONFIG['crn']           |
 """
 
 import os
@@ -39,6 +40,7 @@ COS_CONFIG = {
     SupportedPlatforms.IBM: IbmConfiguration(
         auth_endpoint=__get_from_env("CSUTIL_IBM_AUTH_ENDPOINT"),
         cos_endpoint=__get_from_env("CSUTIL_IBM_COS_ENDPOINT"),
+        crn=__get_from_env("CSUTIL_IBM_COS_CRN"),
         api_key=__get_from_env("CSUTIL_IBM_API_KEY", backup="IBMCLOUD_API_KEY"),
     )
 }
